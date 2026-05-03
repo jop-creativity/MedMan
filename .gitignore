@@ -1,0 +1,63 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Unity asset meta files - NOT ignored (required by Unity)
+# *.meta
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+*.sln
+*.csproj
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# Unity LFS tracked extensions (binary assets)
+*.psd
+*.jpg
+*.jpeg
+*.png
+*.tga
+*.tif
+*.tiff
+*.gif
+*.bmp
+*.exr
+*.hdr
+*.mp3
+*.wav
+*.ogg
+*.aif
+*.aiff
+*.fbx
+*.obj
+*.blend
+*.ma
+*.mb
+*.max
+*.3ds
+*.dae
+*.mp4
+*.mov
+*.avi
+*.pdf
