@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 55934f85133a3b74496e5c944da3d770
+timeCreated: 1488326080
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/LoadLevelResponse.cs
+  uploadId: 731148

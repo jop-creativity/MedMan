@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 76314d06c3675c14fb3f0ca00939521c
+timeCreated: 1473507500
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/LightingResponse.cs
+  uploadId: 731148

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4bda44dcefab158488ef29bbdab37aa0
+timeCreated: 1472235242
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/README.md
+  uploadId: 731148

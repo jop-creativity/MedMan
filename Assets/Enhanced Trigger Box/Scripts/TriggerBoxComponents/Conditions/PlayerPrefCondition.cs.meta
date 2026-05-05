@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 5f5ffe1855f7454499c8976a964bff02
+timeCreated: 1470606245
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Conditions/PlayerPrefCondition.cs
+  uploadId: 731148

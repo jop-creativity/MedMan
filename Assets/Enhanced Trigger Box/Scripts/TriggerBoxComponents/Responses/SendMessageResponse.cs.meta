@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 4ceb4b196f708b54997cabe49338d82e
+timeCreated: 1470603815
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/SendMessageResponse.cs
+  uploadId: 731148

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 85589b02119b3c74f8a18f1b7683a3a3
+timeCreated: 1495633436
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Shaders/SetMaterialDemoShader.shader
+  uploadId: 731148

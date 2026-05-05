@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c4e63f43487de0447ae62d1dda237f06
+timeCreated: 1471897690
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Conditions/TransformCondition.cs
+  uploadId: 731148

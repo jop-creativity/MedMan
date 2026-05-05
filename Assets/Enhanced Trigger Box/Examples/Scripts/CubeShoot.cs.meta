@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: cccf67bf712a1aa4abee684a48461ac0
+timeCreated: 1469736178
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Scripts/CubeShoot.cs
+  uploadId: 731148

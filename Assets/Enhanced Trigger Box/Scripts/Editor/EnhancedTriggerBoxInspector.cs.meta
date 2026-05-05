@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 0cebd5d60b22eee4daf22eca90394220
+timeCreated: 1470574453
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/Editor/EnhancedTriggerBoxInspector.cs
+  uploadId: 731148

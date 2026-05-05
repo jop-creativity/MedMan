@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: d2027efd5cbcc7f4383f7b73677884f6
+timeCreated: 1495637150
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Scripts/FPSControllerShoot.cs
+  uploadId: 731148

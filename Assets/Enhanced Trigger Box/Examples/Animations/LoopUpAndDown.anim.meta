@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6ab8291283c0feb46a682e8f03cb154b
+timeCreated: 1472068049
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Animations/LoopUpAndDown.anim
+  uploadId: 731148

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 7a2aea1e4a505f846830ab977b5ed2d2
+timeCreated: 1495578465
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/SetMaterialProperty.cs
+  uploadId: 731148

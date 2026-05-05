@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ab5fc485fd30fa94f8bcc0ad696a4d31
+timeCreated: 1472068373
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Examples.unity
+  uploadId: 731148

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ad3d366cc8ee24a498799889740303a0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Examples/LightingData.asset
+  uploadId: 731148

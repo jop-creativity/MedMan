@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e800991d112eeef4aa66af9ae0051157
+timeCreated: 1472065971
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Examples/Animations/ExampleAnim.controller
+  uploadId: 731148

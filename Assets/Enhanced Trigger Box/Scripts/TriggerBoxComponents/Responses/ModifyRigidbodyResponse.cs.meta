@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: de9e48af55de30f4c8a1ea37a244f537
+timeCreated: 1470832398
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/ModifyRigidbodyResponse.cs
+  uploadId: 731148

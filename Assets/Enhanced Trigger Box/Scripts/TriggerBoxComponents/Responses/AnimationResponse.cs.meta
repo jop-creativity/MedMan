@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: a7293fe2c2c0bd849a75e98471c4f8b5
+timeCreated: 1470598488
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 72826
+  packageName: Enhanced Trigger Box
+  packageVersion: 0.41
+  assetPath: Assets/Enhanced Trigger Box/Scripts/TriggerBoxComponents/Responses/AnimationResponse.cs
+  uploadId: 731148
