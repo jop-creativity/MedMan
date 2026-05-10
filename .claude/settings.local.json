@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__unity-mcp__Unity_ManageScene",
+      "mcp__UnityMCP__manage_scene",
+      "mcp__UnityMCP__manage_material",
+      "mcp__UnityMCP__batch_execute",
+      "mcp__UnityMCP__manage_camera"
+    ]
+  }
+}
