@@ -61,3 +61,11 @@ x86/
 *.mov
 *.avi
 *.pdf
+
+# AutoSave
+**/AutoSave/
+**/AutoSave.meta
+
+# SampleScene
+**/SampleScene.unity
+**/SampleScene.unity.meta
