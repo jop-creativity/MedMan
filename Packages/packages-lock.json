@@ -17,6 +17,13 @@
       "dependencies": {},
       "hash": "a9e27c03d411d2fca01cc7410c24c97cd77cb539"
     },
+    "com.opalstudio.codepreview": {
+      "version": "https://github.com/Alaxxxx/CodePreview.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "4ab11d1000846c6748f0005a9a07538581010498"
+    },
     "com.tarodev.autosave": {
       "version": "https://github.com/Matthew-J-Spencer/Tarodev.git?path=Assets/Plugins/AutoSave",
       "depth": 0,
