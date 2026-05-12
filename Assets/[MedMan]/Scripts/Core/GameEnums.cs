@@ -34,4 +34,15 @@ namespace MedMan.Core
         Level2,
         Level3
     }
+    
+    /// <summary>
+    /// The type of perceptual effect triggered when the player consumes a pill.
+    /// Each fear has its own effect — defined per FearProfileSO.
+    /// </summary>
+    public enum PillEffectType
+    {
+        None,
+        LightSurge,       // Fear A — darkness flooded with light
+        SpaceExpansion    // Fear B — environment feels vast and open (future expansion) 
+    }
 }

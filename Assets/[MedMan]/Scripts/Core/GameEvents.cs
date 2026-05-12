@@ -1,8 +1,6 @@
 namespace MedMan.Core
 {
-    // ═══════════════════════════════════════════════════════════
-    // GAME STATE EVENTS
-    // ═══════════════════════════════════════════════════════════
+    #region Game State Events
 
     /// <summary>
     /// Published when GameManager changes the game state.
@@ -18,8 +16,8 @@ namespace MedMan.Core
 
         /// <summary>
         /// Unique identifier of the current state.
-        /// Outside Dream: "HotelRoom", "Epilogue", etc.
-        /// Inside Dream: "Fear_A_Level1", "Fear_B_Level3", etc.
+        /// Always in format: "GameState_FearType_DreamLevel"
+        /// Examples: "HotelRoom_None_None", "Dream_Fear_A_Level1", "Epilogue_None_None"
         /// Used as a key to look up FearProfileSO and configuration packages.
         /// </summary>
         public readonly string StateID;
@@ -39,9 +37,9 @@ namespace MedMan.Core
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // DREAM LEVEL EVENTS
-    // ═══════════════════════════════════════════════════════════
+    #endregion
+
+    #region Dream Level Events
 
     /// <summary>
     /// Published by GameManager when a Dream level is initializing.
@@ -76,9 +74,9 @@ namespace MedMan.Core
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // LOADING BARRIER EVENTS
-    // ═══════════════════════════════════════════════════════════
+    #endregion
+
+    #region Loading Barrier Events
 
     /// <summary>
     /// Published by each system after it finishes configuring for a new level.
@@ -95,9 +93,9 @@ namespace MedMan.Core
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // FEAR SELECTION EVENTS
-    // ═══════════════════════════════════════════════════════════
+    #endregion
+
+    #region Fear Selection Events
 
     /// <summary>
     /// Published when the player selects a fear at the doctor's office.
@@ -114,9 +112,101 @@ namespace MedMan.Core
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // SAVE / LOAD EVENTS
-    // ═══════════════════════════════════════════════════════════
+    #endregion
+
+    #region Pill Events
+
+    /// <summary>
+    /// Published when the player consumes a pill.
+    /// FearAManager reacts by triggering the fear-specific visual effect (e.g. light surge).
+    /// SaveSystem records pills consumed.
+    /// </summary>
+    public readonly struct OnPillConsumedEvent
+    {
+        /// <summary>Number of pills remaining after this consumption.</summary>
+        public readonly int PillsRemaining;
+
+        public OnPillConsumedEvent(int pillsRemaining)
+        {
+            PillsRemaining = pillsRemaining;
+        }
+    }
+
+    /// <summary>
+    /// Published when an active pill effect wears off.
+    /// FearAManager reacts by gradually restoring the base dream visual state.
+    /// </summary>
+    public readonly struct OnPillExpiredEvent
+    {
+        /// <summary>Number of pills remaining at expiry.</summary>
+        public readonly int PillsRemaining;
+
+        public OnPillExpiredEvent(int pillsRemaining)
+        {
+            PillsRemaining = pillsRemaining;
+        }
+    }
+
+    #endregion
+
+    #region Checkpoint Events
+
+    /// <summary>
+    /// Published when the player reaches an autosave checkpoint.
+    /// SaveSystem reacts by writing current game state to disk.
+    /// </summary>
+    public readonly struct OnCheckpointReachedEvent
+    {
+        /// <summary>Unique identifier of the checkpoint within the current level.</summary>
+        public readonly string CheckpointID;
+
+        public OnCheckpointReachedEvent(string checkpointID)
+        {
+            CheckpointID = checkpointID;
+        }
+    }
+
+    #endregion
+
+    #region Skill Events
+
+    /// <summary>
+    /// Published when the player unlocks a traversal skill on a hard path.
+    /// SaveSystem records the unlocked skill so it persists across levels.
+    /// </summary>
+    public readonly struct OnSkillUnlockedEvent
+    {
+        /// <summary>Identifier of the unlocked skill (e.g. "ObjectRotation", "Swimming").</summary>
+        public readonly string SkillID;
+
+        public OnSkillUnlockedEvent(string skillID)
+        {
+            SkillID = skillID;
+        }
+    }
+
+    #endregion
+
+    #region Player Events
+
+    /// <summary>
+    /// Published when the player remains stationary for the idle threshold duration.
+    /// NarrativeManager reacts by triggering a location-specific idle monologue.
+    /// </summary>
+    public readonly struct OnPlayerIdleEvent
+    {
+        /// <summary>Duration in seconds the player has been idle.</summary>
+        public readonly float IdleDuration;
+
+        public OnPlayerIdleEvent(float idleDuration)
+        {
+            IdleDuration = idleDuration;
+        }
+    }
+
+    #endregion
+
+    #region Save / Load Events
 
     /// <summary>Published when SaveSystem finishes writing to disk.</summary>
     public readonly struct OnGameSavedEvent
@@ -139,4 +229,6 @@ namespace MedMan.Core
             LoadedStateID = loadedStateID;
         }
     }
+
+    #endregion
 }

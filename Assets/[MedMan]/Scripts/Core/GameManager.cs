@@ -62,20 +62,11 @@ namespace MedMan.Core
 
         /// <summary>
         /// Unique identifier of the current state.
-        /// Outside Dream: "HotelRoom", "Epilogue", etc.
-        /// Inside Dream: "Fear_A_Level1", "Fear_B_Level3", etc.
+        /// Always in format: "GameState_FearType_DreamLevel"
+        /// Examples: "HotelRoom_None_None", "Dream_Fear_A_Level1", "Epilogue_None_None"
         /// Used as a key for FearProfileSO and configuration packages.
         /// </summary>
-        public string CurrentStateID
-        {
-            get
-            {
-                if (CurrentGameState == GameState.Dream)
-                    return $"{CurrentFearType}_{CurrentDreamLevel}";
-
-                return CurrentGameState.ToString();
-            }
-        }
+        public string CurrentStateID => $"{CurrentGameState}_{CurrentFearType}_{CurrentDreamLevel}";
 
         // ─────────────────────────────────────────
         // Event subscriptions
@@ -98,27 +89,14 @@ namespace MedMan.Core
         // ─────────────────────────────────────────
 
         /// <summary>
-        /// Transitions to any state other than Dream.
+        /// Transitions to a new game state.
+        /// For non-Dream states pass FearType.None and DreamLevel.None.
+        /// Example: TransitionTo(GameState.HotelRoom, FearType.None, DreamLevel.None)
+        /// Example: TransitionTo(GameState.Dream, FearType.Fear_A, DreamLevel.Level1)
         /// </summary>
-        public void TransitionTo(GameState newState)
+        public void TransitionTo(GameState newState, FearType fearType, DreamLevel dreamLevel)
         {
-            if (newState == GameState.Dream)
-            {
-                Debug.LogWarning("[GameManager] Use TransitionToDream(fearType, dreamLevel) for the Dream state.");
-                return;
-            }
-
-            SetState(newState, FearType.None, DreamLevel.None);
-        }
-
-        /// <summary>
-        /// Transitions to a specific dream level.
-        /// Starts the loading barrier — the level is revealed only after
-        /// all systems confirm readiness via OnSystemReadyEvent.
-        /// </summary>
-        public void TransitionToDream(FearType fearType, DreamLevel dreamLevel)
-        {
-            SetState(GameState.Dream, fearType, dreamLevel);
+            SetState(newState, fearType, dreamLevel);
         }
 
         /// <summary>Triggers a manual save. SaveSystem knows what to save.</summary>

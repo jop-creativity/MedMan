@@ -15,11 +15,12 @@ namespace MedMan.Core
     /// </summary>
     public static class EventBus
     {
-        private static readonly Dictionary<Type, List<Delegate>> _handlers
-            = new Dictionary<Type, List<Delegate>>();
+        private static readonly Dictionary<Type, HashSet<Delegate>> _handlers
+            = new Dictionary<Type, HashSet<Delegate>>();
 
         /// <summary>
         /// Subscribes a handler to the given event type.
+        /// Duplicate handlers are automatically ignored.
         /// Call in Awake or OnEnable.
         /// </summary>
         public static void Subscribe<T>(Action<T> handler) where T : struct
@@ -27,10 +28,9 @@ namespace MedMan.Core
             Type type = typeof(T);
 
             if (!_handlers.ContainsKey(type))
-                _handlers[type] = new List<Delegate>();
+                _handlers[type] = new HashSet<Delegate>();
 
-            if (!_handlers[type].Contains(handler))
-                _handlers[type].Add(handler);
+            _handlers[type].Add(handler);
         }
 
         /// <summary>
@@ -56,8 +56,9 @@ namespace MedMan.Core
             if (!_handlers.ContainsKey(type) || _handlers[type].Count == 0)
                 return;
 
-            // Copy list — guards against modification during iteration
-            var handlers = new List<Delegate>(_handlers[type]);
+            // Copy to array — guards against modification during iteration
+            var handlers = new Delegate[_handlers[type].Count];
+            _handlers[type].CopyTo(handlers);
 
             foreach (Delegate handler in handlers)
             {
