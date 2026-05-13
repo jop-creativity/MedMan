@@ -231,4 +231,38 @@ namespace MedMan.Core
     }
 
     #endregion
+    
+    #region Scene Load Events
+     
+        /// <summary>
+        /// Published by SceneLoader when an async scene load begins.
+        /// Systems can react by pausing logic, hiding UI, etc.
+        /// </summary>
+        public readonly struct OnSceneLoadStartedEvent
+        {
+            /// <summary>Name of the scene being loaded.</summary>
+            public readonly string SceneName;
+     
+            public OnSceneLoadStartedEvent(string sceneName)
+            {
+                SceneName = sceneName;
+            }
+        }
+     
+        /// <summary>
+        /// Published by SceneLoader when a scene has fully loaded and the fade-in is complete.
+        /// Systems can react by resuming logic, showing UI, etc.
+        /// </summary>
+        public readonly struct OnSceneLoadCompletedEvent
+        {
+            /// <summary>Name of the scene that finished loading.</summary>
+            public readonly string SceneName;
+     
+            public OnSceneLoadCompletedEvent(string sceneName)
+            {
+                SceneName = sceneName;
+            }
+        }
+     
+        #endregion
 }
