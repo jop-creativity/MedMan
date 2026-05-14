@@ -1,6 +1,8 @@
 using UnityEngine;
 using NaughtyAttributes;
 
+#if UNITY_EDITOR
+
 namespace MedMan.Core
 {
     /// <summary>
@@ -81,3 +83,5 @@ namespace MedMan.Core
         }
     }
 }
+
+#endif
