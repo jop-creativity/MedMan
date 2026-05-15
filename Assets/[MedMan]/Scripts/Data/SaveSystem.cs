@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MedMan.Data
@@ -6,15 +7,21 @@ namespace MedMan.Data
     /// Save and load system. Self-contained — knows what to save and where to fetch data from.
     /// GameManager calls only Save() and Load(). No parameters, no external dependencies.
     ///
-    /// Data is fetched via properties that reach directly into source systems.
-    /// Example: int PillsConsumed { get => PillSystem.Instance.PillsConsumed; }
-    ///
-    /// Each system exposes its own properties. SaveSystem reads them at save time.
+    /// Data is collected via CollectSaveData() which assembles a SaveData object
+    /// from all source systems at save time. Each system remains the single source of truth
+    /// for its own data.
     /// Implementation: CS-04.
     /// </summary>
     public class SaveSystem : MonoBehaviour
     {
         public static SaveSystem Instance { get; private set; }
+        
+        /// <summary>
+        /// Absolute path to the save file on disk.
+        /// Uses Application.persistentDataPath — writable on all platforms.
+        /// </summary>
+        private static readonly string SaveFilePath =
+            System.IO.Path.Combine(Application.persistentDataPath, "medman_save.json");
 
         private void Awake()
         {
@@ -37,47 +44,75 @@ namespace MedMan.Data
             Core.EventBus.Unsubscribe<Core.OnGameStateChangedEvent>(HandleGameStateChanged);
         }
 
+        /// <summary>
+        /// Triggers autosave on every game state transition except None.
+        /// </summary>
         private void HandleGameStateChanged(Core.OnGameStateChangedEvent e)
         {
-            // TODO CS-04: autosave on state change if appropriate
+            if (e.NewState != Core.GameState.None)
+                Save();
         }
 
         // ─────────────────────────────────────────
-        // Data source properties
-        // Each property reaches into the source system at save time.
-        // SaveSystem holds no copies — single source of truth stays in each system.
+        // Data collection
         // ─────────────────────────────────────────
-
-        // TODO CS-04: add properties pointing to source systems
-        // Examples:
-        // private int PillsConsumed       => PillSystem.Instance?.PillsConsumed ?? 0;
-        // private FearType SelectedFear   => Core.GameManager.Instance?.CurrentFearType ?? Core.FearType.None;
-        // private string CurrentStateID   => Core.GameManager.Instance?.CurrentStateID ?? string.Empty;
+        
+        /// <summary>
+        /// Collects current game state from all source systems into a single SaveData object.
+        /// Each system remains the single source of truth for its own data.
+        /// </summary>
+        private SaveData CollectSaveData()
+        {
+            return new SaveData
+            {
+                CurrentGameState  = Core.GameManager.Instance?.CurrentGameState  ?? Core.GameState.None,
+                SelectedFear      = Core.GameManager.Instance?.CurrentFearType   ?? Core.FearType.None,
+                CurrentDreamLevel = Core.GameManager.Instance?.CurrentDreamLevel ?? Core.DreamLevel.None,
+                PillsRemaining    = 0, // TODO CS-10: PillSystem.Instance?.PillsRemaining ?? 0
+                PillsConsumedTotal = 0, // TODO CS-10: PillSystem.Instance?.PillsConsumedTotal ?? 0
+                UnlockedSkills    = new List<Core.SkillID>(),    // TODO: SkillSystem
+                PathChoices       = new List<Core.PathChoice>()  // TODO: ChoiceManager
+            };
+        }
 
         // ─────────────────────────────────────────
         // Public API
         // ─────────────────────────────────────────
 
         /// <summary>
-        /// Saves game state. SaveSystem collects data from its own properties.
+        /// Collects current game state via CollectSaveData(), serializes to JSON
+        /// and writes to disk at SaveFilePath.
         /// Implementation: CS-04.
         /// </summary>
         public void Save()
         {
-            // TODO CS-04: collect data from properties, serialize to JSON, write to disk
-            Debug.Log("[SaveSystem] Save() — TODO CS-04");
+            SaveData data = CollectSaveData();
+            string json = JsonUtility.ToJson(data, prettyPrint: true);
+            System.IO.File.WriteAllText(SaveFilePath, json);
+            Debug.Log($"[SaveSystem] Game saved to: {SaveFilePath}");
             Core.EventBus.Publish(new Core.OnGameSavedEvent(Core.GameManager.Instance?.CurrentStateID ?? string.Empty));
         }
 
         /// <summary>
-        /// Reads save data and restores game state.
+        /// Reads save data from disk and restores game state.
         /// Implementation: CS-04.
         /// </summary>
         public void Load()
         {
-            // TODO CS-04: read JSON from disk, deserialize, restore state via GameManager
-            Debug.Log("[SaveSystem] Load() — TODO CS-04");
-            Core.EventBus.Publish(new Core.OnGameLoadedEvent(string.Empty));
+            if (!System.IO.File.Exists(SaveFilePath))
+            {
+                Debug.Log("[SaveSystem] No save file found — starting fresh.");
+                return;
+            }
+
+            string json = System.IO.File.ReadAllText(SaveFilePath);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            // TODO CS-04: restore state via GameManager
+            // Core.GameManager.Instance?.TransitionTo(data.CurrentGameState, data.SelectedFear, data.CurrentDreamLevel);
+
+            Debug.Log($"[SaveSystem] Game loaded from: {SaveFilePath}");
+            Core.EventBus.Publish(new Core.OnGameLoadedEvent(data.CurrentGameState.ToString()));
         }
     }
 }

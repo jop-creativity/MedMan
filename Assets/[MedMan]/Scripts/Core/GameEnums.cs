@@ -45,4 +45,25 @@ namespace MedMan.Core
         LightSurge,       // Fear A — darkness flooded with light
         SpaceExpansion    // Fear B — environment feels vast and open (future expansion) 
     }
+    
+    /// <summary>
+    /// Traversal skills unlocked on hard paths. Persist across levels.
+    /// Each skill corresponds to a hard path mechanic introduced in a specific level.
+    /// </summary>
+    public enum SkillID
+    {
+        None,
+        ObjectRotation,  // Fear A — Level 1 hard path
+        Swimming         // Fear A — Level 2 hard path
+    }
+    
+    /// <summary>
+    /// Records which path the player chose at each corridor split.
+    /// </summary>
+    public enum PathChoice
+    {
+        None,
+        Easy,
+        Hard
+    }
 }
