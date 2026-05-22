@@ -136,6 +136,24 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ConsumePill"",
+                    ""type"": ""Button"",
+                    ""id"": ""8b0305cd-b602-43f0-a951-112c1054deaa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Take"",
+                    ""type"": ""Button"",
+                    ""id"": ""66b91b33-8d18-4374-9b07-bf9e9796b13f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -237,6 +255,28 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f3c99b9e-9408-490f-87b5-510df16e1a8d"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""ConsumePill"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6eb4315a-c6cc-4434-bbc0-05a39301bd9e"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Take"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -267,6 +307,8 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_Cancel = m_Player.FindAction("Cancel", throwIfNotFound: true);
+        m_Player_ConsumePill = m_Player.FindAction("ConsumePill", throwIfNotFound: true);
+        m_Player_Take = m_Player.FindAction("Take", throwIfNotFound: true);
     }
 
     ~@MadMan_InputActions()
@@ -352,6 +394,8 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Sprint;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_Cancel;
+    private readonly InputAction m_Player_ConsumePill;
+    private readonly InputAction m_Player_Take;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -383,6 +427,14 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Cancel".
         /// </summary>
         public InputAction @Cancel => m_Wrapper.m_Player_Cancel;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ConsumePill".
+        /// </summary>
+        public InputAction @ConsumePill => m_Wrapper.m_Player_ConsumePill;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Take".
+        /// </summary>
+        public InputAction @Take => m_Wrapper.m_Player_Take;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -424,6 +476,12 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
+            @ConsumePill.started += instance.OnConsumePill;
+            @ConsumePill.performed += instance.OnConsumePill;
+            @ConsumePill.canceled += instance.OnConsumePill;
+            @Take.started += instance.OnTake;
+            @Take.performed += instance.OnTake;
+            @Take.canceled += instance.OnTake;
         }
 
         /// <summary>
@@ -450,6 +508,12 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
+            @ConsumePill.started -= instance.OnConsumePill;
+            @ConsumePill.performed -= instance.OnConsumePill;
+            @ConsumePill.canceled -= instance.OnConsumePill;
+            @Take.started -= instance.OnTake;
+            @Take.performed -= instance.OnTake;
+            @Take.canceled -= instance.OnTake;
         }
 
         /// <summary>
@@ -538,5 +602,19 @@ public partial class @MadMan_InputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ConsumePill" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnConsumePill(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Take" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTake(InputAction.CallbackContext context);
     }
 }

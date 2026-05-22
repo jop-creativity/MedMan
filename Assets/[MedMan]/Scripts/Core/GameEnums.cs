@@ -74,6 +74,15 @@ namespace MedMan.Core
         None,
         Examine,
         Rotate,
-        Use
+        Use,
+        Take    // Pick up an object from the world
+    }
+    
+    // Pickup types — used by PickupObject to identify what was collected.
+    // Add new values here to extend the pickup system.
+    public enum PickupType
+    {
+        None,
+        Pills
     }
 }

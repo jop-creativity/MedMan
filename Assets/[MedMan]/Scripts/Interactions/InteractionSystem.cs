@@ -32,6 +32,7 @@ namespace MedMan.Interaction
         private IInteractable _currentHovered;
         private IInteractable _currentActive;
         private bool _isInteracting;
+        private InputAction _takeAction;
 
         // ─────────────────────────────────────────
         // Unity lifecycle
@@ -44,14 +45,27 @@ namespace MedMan.Interaction
         {
             _interactAction = InputSystem.actions.FindAction("Player/Interact");
             _cancelAction   = InputSystem.actions.FindAction("Player/Cancel");
+            _takeAction = InputSystem.actions.FindAction("Player/Take");
             _interactAction?.Enable();
             _cancelAction?.Enable();
+            _takeAction?.Enable();
+        }
+        
+        private void OnEnable()
+        {
+            EventBus.Subscribe<OnInteractionEndedEvent>(HandleInteractionEnded);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<OnInteractionEndedEvent>(HandleInteractionEnded);
         }
 
         private void OnDestroy()
         {
             _interactAction?.Disable();
             _cancelAction?.Disable();
+            _takeAction?.Disable();
         }
 
         /// <summary>
@@ -64,6 +78,7 @@ namespace MedMan.Interaction
             HandleCancel();
             HandleRaycast();
             HandleInteract();
+            HandleTakeInput();
         }
 
         // ─────────────────────────────────────────
@@ -117,12 +132,33 @@ namespace MedMan.Interaction
             if (_currentHovered == null) return;
             if (!_interactAction.WasPressedThisFrame()) return;
 
+            // Guard against destroyed objects
+            if (_currentHovered as Object == null) 
+            {
+                _currentHovered = null;
+                return;
+            }
+
             _currentActive = _currentHovered;
             _isInteracting = true;
 
             _currentActive.OnInteract();
             EventBus.Publish(new OnInteractionStartedEvent(_currentActive.InteractionType));
             Debug.Log($"[InteractionSystem] Interaction started: {_currentActive.InteractionType}");
+        }
+        
+        /// <summary>
+        /// Publishes OnTakeInputEvent when take input is pressed during an active Take interaction.
+        /// Only fires if current interaction type is Take.
+        /// </summary>
+        private void HandleTakeInput()
+        {
+            if (!_isInteracting) return;
+            if (_currentActive?.InteractionType != InteractionType.Take) return;
+            if (!_takeAction.WasPressedThisFrame()) return;
+
+            EventBus.Publish(new OnTakeInputEvent());
+            Debug.Log("[InteractionSystem] Take input published.");
         }
 
         /// <summary>
@@ -172,6 +208,17 @@ namespace MedMan.Interaction
             ClearHover();
 
             Debug.Log("[InteractionSystem] Interaction force-ended.");
+        }
+        
+        /// <summary>
+        /// Clears active interaction state when an interaction ends externally.
+        /// Prevents stale references to destroyed objects.
+        /// </summary>
+        private void HandleInteractionEnded(OnInteractionEndedEvent e)
+        {
+            _currentActive  = null;
+            _isInteracting  = false;
+            _currentHovered = null;
         }
     }
 }

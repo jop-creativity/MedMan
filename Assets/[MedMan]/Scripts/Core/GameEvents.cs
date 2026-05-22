@@ -1,3 +1,4 @@
+using MedMan.Data;
 using UnityEngine;
 
 namespace MedMan.Core
@@ -50,15 +51,17 @@ namespace MedMan.Core
     /// </summary>
     public readonly struct OnLevelInitializedEvent
     {
-        public readonly FearType   FearType;
-        public readonly DreamLevel DreamLevel;
-        public readonly string     StateID;
+        public readonly FearType      FearType;
+        public readonly DreamLevel    DreamLevel;
+        public readonly string        StateID;
+        public readonly FearProfileSO Profile;
 
-        public OnLevelInitializedEvent(FearType fearType, DreamLevel dreamLevel, string stateID)
+        public OnLevelInitializedEvent(FearType fearType, DreamLevel dreamLevel, string stateID, FearProfileSO profile)
         {
             FearType   = fearType;
             DreamLevel = dreamLevel;
             StateID    = stateID;
+            Profile    = profile;
         }
     }
 
@@ -125,29 +128,21 @@ namespace MedMan.Core
     /// </summary>
     public readonly struct OnPillConsumedEvent
     {
-        /// <summary>Number of pills remaining after this consumption.</summary>
         public readonly int PillsRemaining;
-
-        public OnPillConsumedEvent(int pillsRemaining)
-        {
-            PillsRemaining = pillsRemaining;
-        }
+        public OnPillConsumedEvent(int pillsRemaining) => PillsRemaining = pillsRemaining;
     }
 
     /// <summary>
     /// Published when an active pill effect wears off.
     /// FearAManager reacts by gradually restoring the base dream visual state.
     /// </summary>
-    public readonly struct OnPillExpiredEvent
-    {
-        /// <summary>Number of pills remaining at expiry.</summary>
-        public readonly int PillsRemaining;
-
-        public OnPillExpiredEvent(int pillsRemaining)
-        {
-            PillsRemaining = pillsRemaining;
-        }
-    }
+    public readonly struct OnPillExpiredEvent { }
+    
+    /// <summary>
+    /// Published when the player attempts to consume a pill but has none remaining.
+    /// Used to trigger feedback — protagonist line, audio cue, or visual hint.
+    /// </summary>
+    public readonly struct OnPillDepletedEvent { }
 
     #endregion
 
@@ -185,6 +180,29 @@ namespace MedMan.Core
         {
             SkillID = skillID;
         }
+    }
+    
+    /// <summary>Published when the player picks up an object.</summary>
+    public readonly struct OnPickupCollectedEvent
+    {
+        public readonly PickupType PickupType;
+        public readonly int Amount;
+
+        public OnPickupCollectedEvent(PickupType pickupType, int amount)
+        {
+            PickupType = pickupType;
+            Amount     = amount;
+        }
+    }
+    
+    /// <summary>Published when the player presses the take input during a pickup interaction.</summary>
+    public readonly struct OnTakeInputEvent { }
+
+    /// <summary>Published to show or hide the take prompt UI.</summary>
+    public readonly struct OnPickupPromptShownEvent
+    {
+        public readonly bool IsVisible;
+        public OnPickupPromptShownEvent(bool isVisible) => IsVisible = isVisible;
     }
 
     #endregion

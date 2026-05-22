@@ -50,6 +50,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ConsumePill",
+                    "type": "Button",
+                    "id": "8b0305cd-b602-43f0-a951-112c1054deaa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Take",
+                    "type": "Button",
+                    "id": "66b91b33-8d18-4374-9b07-bf9e9796b13f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -149,6 +167,28 @@
                     "processors": "",
                     "groups": ";Keyboard",
                     "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f3c99b9e-9408-490f-87b5-510df16e1a8d",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "ConsumePill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6eb4315a-c6cc-4434-bbc0-05a39301bd9e",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Take",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

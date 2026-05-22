@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using MedMan.Data;
+using MedMan.Gameplay;
+using NaughtyAttributes;
 
 namespace MedMan.Core
 {
@@ -46,6 +48,27 @@ namespace MedMan.Core
         {
             UnsubscribeFromEvents();
         }
+        
+        #if UNITY_EDITOR
+        [BoxGroup("Debug")]
+        [SerializeField] private FearProfileSO _debugFearProfile;
+
+        private void Start()
+        {
+            if (_debugFearProfile != null)
+            {
+                CurrentFearProfile = _debugFearProfile;
+                CurrentFearType    = _debugFearProfile.FearType;
+                CurrentDreamLevel  = _debugFearProfile.DreamLevel;
+        
+                // Initialize PillSystem directly for debug purposes
+                var pillSystem = FindObjectOfType<PillSystem>();
+                pillSystem?.Initialize(_debugFearProfile);
+        
+                Debug.Log($"[GameManager] Debug profile loaded: {_debugFearProfile.StateIDReadable}");
+            }
+        }
+        #endif
 
         // ─────────────────────────────────────────
         // Game state — read-only from outside
@@ -59,6 +82,9 @@ namespace MedMan.Core
 
         /// <summary>Active dream level. None outside the Dream section.</summary>
         public DreamLevel CurrentDreamLevel { get; private set; } = DreamLevel.None;
+        
+        /// <summary>Active fear profile for the current dream level.</summary>
+        public FearProfileSO CurrentFearProfile { get; private set; }
 
         /// <summary>
         /// Unique identifier of the current state.
@@ -162,7 +188,8 @@ namespace MedMan.Core
             EventBus.Publish(new OnLevelInitializedEvent(
                 CurrentFearType,
                 CurrentDreamLevel,
-                CurrentStateID
+                CurrentStateID,
+                CurrentFearProfile
             ));
         }
 

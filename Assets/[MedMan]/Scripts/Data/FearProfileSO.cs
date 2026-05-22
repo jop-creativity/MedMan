@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Rendering;
 using NaughtyAttributes;
+using UnityEngine.Serialization;
 
 namespace MedMan.Data
 {
@@ -124,9 +125,10 @@ namespace MedMan.Data
         [BoxGroup("Gameplay")]
         [SerializeField] private Core.PillEffectType _pillEffectType;
 
+        [FormerlySerializedAs("_startPillsCount")]
         [BoxGroup("Gameplay")]
         [MinValue(0)]
-        [SerializeField] private int _pillCount = 3;
+        [SerializeField] private int _startPillsCount = 3;
 
         [BoxGroup("Gameplay")]
         [MinValue(0f)]
@@ -139,7 +141,7 @@ namespace MedMan.Data
         public Core.PillEffectType PillEffectType => _pillEffectType;
 
         /// <summary>Number of pills the player starts with at the beginning of this level.</summary>
-        public int PillCount       => _pillCount;
+        public int StartPillsCount       => _startPillsCount;
 
         /// <summary>Duration in seconds of a single pill effect.</summary>
         public float PillDuration  => _pillDuration;

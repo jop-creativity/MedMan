@@ -64,7 +64,7 @@ namespace MedMan.Audio
 
         [Button("Snapshot — Dream (simulate pill expired)")]
         private void SimulatePillExpired()
-            => EventBus.Publish(new OnPillExpiredEvent(2));
+            => EventBus.Publish(new OnPillExpiredEvent());
 
         // ─────────────────────────────────────────
         // Playback Tests
