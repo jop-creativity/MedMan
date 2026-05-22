@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace MedMan.Core
 {
     #region Game State Events
@@ -265,4 +267,51 @@ namespace MedMan.Core
         }
      
         #endregion
+        
+    #region Camera Events
+
+    /// <summary>
+    /// Published when a narrative trigger requests camera assist toward a world-space target.
+    /// CameraController gently guides view toward the target without hard-locking input.
+    /// </summary>
+    public readonly struct OnCameraAssistRequestedEvent
+    {
+        /// <summary>World-space position the camera should be guided toward.</summary>
+        public readonly Vector3 TargetPosition;
+
+        /// <summary>Strength of the assist. Range 0-1. Higher = faster guidance.</summary>
+        public readonly float AssistStrength;
+
+        public OnCameraAssistRequestedEvent(Vector3 targetPosition, float assistStrength)
+        {
+            TargetPosition = targetPosition;
+            AssistStrength = assistStrength;
+        }
+    }
+
+    /// <summary>
+    /// Published when an interaction begins and camera rotation should be constrained.
+    /// CameraController limits how far the player can look away from the interaction point.
+    /// </summary>
+    public readonly struct OnCameraLockRequestedEvent
+    {
+        /// <summary>Maximum horizontal rotation in degrees from current facing direction.</summary>
+        public readonly float MaxHorizontalAngle;
+
+        /// <summary>Maximum vertical rotation in degrees from current facing direction.</summary>
+        public readonly float MaxVerticalAngle;
+
+        public OnCameraLockRequestedEvent(float maxHorizontalAngle, float maxVerticalAngle)
+        {
+            MaxHorizontalAngle = maxHorizontalAngle;
+            MaxVerticalAngle   = maxVerticalAngle;
+        }
+    }
+
+    /// <summary>
+    /// Published when an interaction ends and camera rotation constraints should be released.
+    /// </summary>
+    public readonly struct OnCameraReleaseRequestedEvent { }
+
+    #endregion
 }
