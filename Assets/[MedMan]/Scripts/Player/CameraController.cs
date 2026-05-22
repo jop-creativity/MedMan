@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using MedMan.Core;
@@ -39,24 +40,37 @@ namespace MedMan.Player
         [BoxGroup("Interaction Lock")]
         [Range(0f, 90f)]
         [SerializeField] private float _lockMaxVertical = 30f;
+        
+        [BoxGroup("Interaction Mode")]
+        [SerializeField] private float _interactionTweenDuration = 0.4f;
+
 
         private const float _lookThreshold = 0.01f;
 
+        private Vector3 _anchorLocalPosition;
+        private Quaternion _anchorLocalRotation;
+        private Vector3 _anchorWorldPosition;
+        private Quaternion _anchorWorldRotation;
         private Transform _playerTransform;
+        
         private InputAction _lookAction;
         private float _verticalRotation;
 
         private bool _isControlEnabled = true;
         private bool _isLocked;
-
+        private bool _isInInteractionMode;
         private bool _isAssisting;
-        private Vector3 _assistTarget;
-        private float _assistStrength;
-
         private bool _isRotationLocked;
+        private bool _isTweening;
+        
+        private float _assistStrength;
         private float _lockHorizontal;
         private float _lockVertical;
+        private float _anchorVerticalRotation;
+        
         private Quaternion _lockBaseRotation;
+        private Vector3 _assistTarget;
+
 
         // ─────────────────────────────────────────
         // Properties — IControllable
@@ -105,6 +119,7 @@ namespace MedMan.Player
         private void LateUpdate()
         {
             if (!_isControlEnabled) return;
+            if (_isTweening) return;
 
             HandleLook();
 
@@ -178,14 +193,32 @@ namespace MedMan.Player
         private void HandleLook()
         {
             Vector2 lookInput = _lookAction?.ReadValue<Vector2>() ?? Vector2.zero;
-
             if (lookInput.sqrMagnitude < _lookThreshold) return;
 
             float mouseX = lookInput.x * _mouseSensitivity;
             float mouseY = lookInput.y * _mouseSensitivity;
 
             _verticalRotation -= mouseY;
-            _verticalRotation  = Mathf.Clamp(_verticalRotation, _verticalLookMin, _verticalLookMax);
+
+            if (_isInInteractionMode)
+            {
+                // Clamp relative to view point's base pitch, not absolute zero
+                float basePitch = _lockBaseRotation.eulerAngles.x;
+                if (basePitch > 180f) basePitch -= 360f;
+
+                _verticalRotation = Mathf.Clamp(_verticalRotation, 
+                    basePitch - _lockMaxVertical, 
+                    basePitch + _lockMaxVertical);
+
+                float clampedX = Mathf.Clamp(transform.eulerAngles.y + mouseX,
+                    _lockBaseRotation.eulerAngles.y - _lockMaxHorizontal,
+                    _lockBaseRotation.eulerAngles.y + _lockMaxHorizontal);
+
+                transform.rotation = Quaternion.Euler(_verticalRotation, clampedX, 0f);
+                return;
+            }
+
+            _verticalRotation = Mathf.Clamp(_verticalRotation, _verticalLookMin, _verticalLookMax);
 
             if (_isRotationLocked)
             {
@@ -236,6 +269,8 @@ namespace MedMan.Player
             EventBus.Subscribe<OnCameraAssistRequestedEvent>(HandleAssistRequested);
             EventBus.Subscribe<OnCameraLockRequestedEvent>(HandleLockRequested);
             EventBus.Subscribe<OnCameraReleaseRequestedEvent>(HandleReleaseRequested);
+            EventBus.Subscribe<OnInteractionViewRequestedEvent>(HandleInteractionViewRequested);
+            EventBus.Subscribe<OnInteractionViewExitedEvent>(HandleInteractionViewExited);
         }
 
         private void UnsubscribeFromEvents()
@@ -243,6 +278,8 @@ namespace MedMan.Player
             EventBus.Unsubscribe<OnCameraAssistRequestedEvent>(HandleAssistRequested);
             EventBus.Unsubscribe<OnCameraLockRequestedEvent>(HandleLockRequested);
             EventBus.Unsubscribe<OnCameraReleaseRequestedEvent>(HandleReleaseRequested);
+            EventBus.Unsubscribe<OnInteractionViewRequestedEvent>(HandleInteractionViewRequested);
+            EventBus.Unsubscribe<OnInteractionViewExitedEvent>(HandleInteractionViewExited);
         }
 
         private void HandleAssistRequested(OnCameraAssistRequestedEvent e)
@@ -253,5 +290,79 @@ namespace MedMan.Player
 
         private void HandleReleaseRequested(OnCameraReleaseRequestedEvent e)
             => Releaselock();
+        
+        private void HandleInteractionViewRequested(OnInteractionViewRequestedEvent e)
+    => EnterInteractionMode(e.ViewPoint);
+
+        private void HandleInteractionViewExited(OnInteractionViewExitedEvent e)
+            => ExitInteractionMode();
+
+        /// <summary>
+        /// Detaches camera from player, tweens it to the interaction view point,
+        /// then locks rotation and blocks player movement.
+        /// </summary>
+        private void EnterInteractionMode(Transform viewPoint)
+        {
+            if (_isInInteractionMode) return;
+            _isInInteractionMode = true;
+
+            // Snapshot both local and world before detaching
+            _anchorLocalPosition = transform.localPosition;
+            _anchorLocalRotation = transform.localRotation;
+            _anchorWorldPosition = transform.position;
+            _anchorWorldRotation = transform.rotation;
+            _anchorVerticalRotation = _verticalRotation;
+
+            EventBus.Publish(new OnPlayerControlChangedEvent(false));
+
+            // Detach BEFORE tween — prevents player transform from dragging camera
+            transform.SetParent(null);
+
+            _isTweening = true;
+
+            transform.DOMove(viewPoint.position, _interactionTweenDuration).SetEase(Ease.InOutSine);
+            transform.DORotateQuaternion(viewPoint.rotation, _interactionTweenDuration)
+                .SetEase(Ease.InOutSine)
+                .OnComplete(() =>
+                {
+                    _isTweening = false;
+                    // Sync vertical rotation to view point's actual pitch
+                    _verticalRotation = viewPoint.eulerAngles.x;
+                    if (_verticalRotation > 180f) _verticalRotation -= 360f;
+                    LockRotation(_lockMaxHorizontal, _lockMaxVertical);
+                    Debug.Log("[CameraController] Interaction mode entered.");
+                });
+        }
+
+        /// <summary>
+        /// Tweens camera back to player anchor position and rotation,
+        /// re-attaches it, releases rotation lock and restores player movement.
+        /// </summary>
+        private void ExitInteractionMode()
+        {
+            if (!_isInInteractionMode) return;
+            _isInInteractionMode = false;
+
+            Releaselock();
+
+            _isTweening = true;
+            transform.DOMove(_anchorWorldPosition, _interactionTweenDuration).SetEase(Ease.InOutSine);
+            transform.DORotateQuaternion(_anchorWorldRotation, _interactionTweenDuration)
+                .SetEase(Ease.InOutSine)
+                .OnComplete(() =>
+                {
+                    _isTweening = false;
+                    transform.SetParent(_playerTransform);
+                    transform.localPosition = _anchorLocalPosition;
+                    transform.localRotation = _anchorLocalRotation;
+                    _verticalRotation = _anchorLocalRotation.eulerAngles.x;
+                    if (_verticalRotation > 180f) _verticalRotation -= 360f;
+
+                    _playerTransform.rotation = Quaternion.Euler(0f, _anchorWorldRotation.eulerAngles.y, 0f);
+
+                    EventBus.Publish(new OnPlayerControlChangedEvent(true));
+                    Debug.Log("[CameraController] Interaction mode exited.");
+                });
+        }
     }
 }

@@ -66,4 +66,14 @@ namespace MedMan.Core
         Easy,
         Hard
     }
+    
+    // Interaction types — used by IInteractable and InteractionCursor.
+    // Add new values here to extend the cursor system with new interaction states.
+    public enum InteractionType
+    {
+        None,
+        Examine,
+        Rotate,
+        Use
+    }
 }

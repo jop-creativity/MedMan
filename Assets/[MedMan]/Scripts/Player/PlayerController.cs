@@ -62,6 +62,22 @@ namespace MedMan.Player
             _moveAction?.Enable();
             _sprintAction?.Enable();
         }
+        
+        /// <summary>
+        /// Subscribes to player control change events.
+        /// </summary>
+        private void OnEnable()
+        {
+            EventBus.Subscribe<OnPlayerControlChangedEvent>(HandleControlChanged);
+        }
+        
+        /// <summary>
+        /// Unsubscribes from player control change events.
+        /// </summary>
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<OnPlayerControlChangedEvent>(HandleControlChanged);
+        }
 
         private void OnDestroy()
         {
@@ -149,6 +165,16 @@ namespace MedMan.Player
                 EventBus.Publish(new OnPlayerIdleEvent(_idleTimer));
                 Debug.Log($"[PlayerController] Player idle for {_idleTimer:F1}s — event published.");
             }
+        }
+        
+        /// <summary>
+        /// Enables or disables player control in response to game systems
+        /// that need to take movement away from the player (e.g. interaction mode, cutscenes).
+        /// </summary>
+        private void HandleControlChanged(OnPlayerControlChangedEvent e)
+        {
+            if (e.IsEnabled) EnableControl();
+            else DisableControl();
         }
     }
 }

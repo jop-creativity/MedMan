@@ -205,6 +205,13 @@ namespace MedMan.Core
             IdleDuration = idleDuration;
         }
     }
+    
+    /// <summary>Published to enable or disable player movement control.</summary>
+    public readonly struct OnPlayerControlChangedEvent
+    {
+        public readonly bool IsEnabled;
+        public OnPlayerControlChangedEvent(bool isEnabled) => IsEnabled = isEnabled;
+    }
 
     #endregion
 
@@ -312,6 +319,41 @@ namespace MedMan.Core
     /// Published when an interaction ends and camera rotation constraints should be released.
     /// </summary>
     public readonly struct OnCameraReleaseRequestedEvent { }
+
+    #endregion
+    
+    #region Interaction Events
+
+    /// <summary>Published when the player's raycast lands on or leaves an IInteractable.</summary>
+    public readonly struct OnInteractableHoveredEvent
+    {
+        public readonly InteractionType Type;
+        public OnInteractableHoveredEvent(InteractionType type) => Type = type;
+    }
+
+    /// <summary>Published when the player begins an interaction.</summary>
+    public readonly struct OnInteractionStartedEvent
+    {
+        public readonly InteractionType Type;
+        public OnInteractionStartedEvent(InteractionType type) => Type = type;
+    }
+
+    /// <summary>Published when an interaction ends — either by cancel input or force-end.</summary>
+    public readonly struct OnInteractionEndedEvent
+    {
+        public readonly InteractionType Type;
+        public OnInteractionEndedEvent(InteractionType type) => Type = type;
+    }
+    
+    /// <summary>Published when the player begins an interaction requiring a camera view point.</summary>
+    public readonly struct OnInteractionViewRequestedEvent
+    {
+        public readonly Transform ViewPoint;
+        public OnInteractionViewRequestedEvent(Transform viewPoint) => ViewPoint = viewPoint;
+    }
+
+    /// <summary>Published when the player exits an interaction and the camera should return to the player.</summary>
+    public readonly struct OnInteractionViewExitedEvent { }
 
     #endregion
 }
