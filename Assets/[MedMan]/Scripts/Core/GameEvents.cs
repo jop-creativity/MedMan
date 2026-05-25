@@ -1,4 +1,5 @@
 using MedMan.Data;
+using MedMan.Narrative;
 using UnityEngine;
 
 namespace MedMan.Core
@@ -372,6 +373,27 @@ namespace MedMan.Core
 
     /// <summary>Published when the player exits an interaction and the camera should return to the player.</summary>
     public readonly struct OnInteractionViewExitedEvent { }
+
+    #endregion
+    
+    #region Narrative Events
+
+    /// <summary>Published when a dialogue line begins displaying.</summary>
+    public readonly struct OnDialogueLineStartedEvent
+    {
+        public readonly DialogueLineSO Line;
+        public OnDialogueLineStartedEvent(DialogueLineSO line) => Line = line;
+    }
+
+    /// <summary>Published when a dialogue line finishes displaying.</summary>
+    public readonly struct OnDialogueLineEndedEvent
+    {
+        public readonly DialogueLineSO Line;
+        public OnDialogueLineEndedEvent(DialogueLineSO line) => Line = line;
+    }
+
+    /// <summary>Published when the entire dialogue sequence finishes.</summary>
+    public readonly struct OnDialogueSequenceEndedEvent { }
 
     #endregion
 }
