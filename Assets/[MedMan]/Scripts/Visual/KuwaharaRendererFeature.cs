@@ -23,7 +23,7 @@ namespace MedMan.Visual
         [BoxGroup("Parameters")]
         [Range(2f, 12f)]
         [Tooltip("Radius of the Kuwahara kernel. Higher = stronger painterly effect, more expensive.")]
-        [SerializeField] private float _kernelSize = 6f;
+        [SerializeField] private float _kernelSize = 12f;
 
         [BoxGroup("Parameters")]
         [Range(0f, 1f)]
@@ -33,19 +33,19 @@ namespace MedMan.Visual
         [BoxGroup("Parameters")]
         [Range(1f, 18f)]
         [Tooltip("Sharpness of sector boundaries. Higher = more distinct brush strokes.")]
-        [SerializeField] private float _sharpness = 8f;
+        [SerializeField] private float _sharpness = 18f;
         
         [BoxGroup("Parameters")]
         [Range(1f, 18f)]
-        [SerializeField] private float _hardness = 8f;
+        [SerializeField] private float _hardness = 1f;
 
         [BoxGroup("Parameters")]
         [Range(0f, 3f)]
-        [SerializeField] private float _zeroCrossing = 0.58f;
+        [SerializeField] private float _zeroCrossing = 1.09f;
 
         [BoxGroup("Parameters")]
         [Range(0f, 3f)]
-        [SerializeField] private float _zeta = 0.1f;
+        [SerializeField] private float _zeta = 0.21f;
 
         private KuwaharaRenderPass _pass;
 
@@ -75,7 +75,7 @@ namespace MedMan.Visual
         {
             _pass = new KuwaharaRenderPass
             {
-                renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing
+                renderPassEvent = RenderPassEvent.BeforeRenderingTransparents
             };
         }
 
