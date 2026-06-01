@@ -46,6 +46,8 @@ namespace MedMan.Player
 
 
         private const float _lookThreshold = 0.01f;
+        private const float _lookMaxDelta     = 100f;
+        private const float _lookMaxDeltaSqr  = _lookMaxDelta * _lookMaxDelta;
 
         private Vector3 _anchorLocalPosition;
         private Quaternion _anchorLocalRotation;
@@ -62,6 +64,7 @@ namespace MedMan.Player
         private bool _isAssisting;
         private bool _isRotationLocked;
         private bool _isTweening;
+        private bool _skipNextFrame;
         
         private float _assistStrength;
         private float _lockHorizontal;
@@ -193,7 +196,8 @@ namespace MedMan.Player
         private void HandleLook()
         {
             Vector2 lookInput = _lookAction?.ReadValue<Vector2>() ?? Vector2.zero;
-            if (lookInput.sqrMagnitude < _lookThreshold) return;
+            
+            if (lookInput.sqrMagnitude < _lookThreshold || lookInput.sqrMagnitude > _lookMaxDeltaSqr) return;
 
             float mouseX = lookInput.x * _mouseSensitivity;
             float mouseY = lookInput.y * _mouseSensitivity;
