@@ -138,7 +138,7 @@ namespace MedMan.Core
     /// FearAManager reacts by gradually restoring the base dream visual state.
     /// </summary>
     public readonly struct OnPillExpiredEvent { }
-    
+
     /// <summary>
     /// Published when the player attempts to consume a pill but has none remaining.
     /// Used to trigger feedback — protagonist line, audio cue, or visual hint.
@@ -182,7 +182,7 @@ namespace MedMan.Core
             SkillID = skillID;
         }
     }
-    
+
     /// <summary>Published when the player picks up an object.</summary>
     public readonly struct OnPickupCollectedEvent
     {
@@ -195,7 +195,7 @@ namespace MedMan.Core
             Amount     = amount;
         }
     }
-    
+
     /// <summary>Published when the player presses the take input during a pickup interaction.</summary>
     public readonly struct OnTakeInputEvent { }
 
@@ -212,7 +212,7 @@ namespace MedMan.Core
 
     /// <summary>
     /// Published when the player remains stationary for the idle threshold duration.
-    /// NarrativeManager reacts by triggering a location-specific idle monologue.
+    /// IdleMonologueSystem reacts by triggering a location-specific idle monologue line.
     /// </summary>
     public readonly struct OnPlayerIdleEvent
     {
@@ -224,7 +224,13 @@ namespace MedMan.Core
             IdleDuration = idleDuration;
         }
     }
-    
+
+    /// <summary>
+    /// Published when the player resumes movement after an idle state.
+    /// IdleMonologueSystem reacts by cancelling any pending idle coroutine.
+    /// </summary>
+    public readonly struct OnPlayerMovedEvent { }
+
     /// <summary>Published to enable or disable player movement control.</summary>
     public readonly struct OnPlayerControlChangedEvent
     {
@@ -259,41 +265,41 @@ namespace MedMan.Core
     }
 
     #endregion
-    
+
     #region Scene Load Events
-     
-        /// <summary>
-        /// Published by SceneLoader when an async scene load begins.
-        /// Systems can react by pausing logic, hiding UI, etc.
-        /// </summary>
-        public readonly struct OnSceneLoadStartedEvent
+
+    /// <summary>
+    /// Published by SceneLoader when an async scene load begins.
+    /// Systems can react by pausing logic, hiding UI, etc.
+    /// </summary>
+    public readonly struct OnSceneLoadStartedEvent
+    {
+        /// <summary>Name of the scene being loaded.</summary>
+        public readonly string SceneName;
+
+        public OnSceneLoadStartedEvent(string sceneName)
         {
-            /// <summary>Name of the scene being loaded.</summary>
-            public readonly string SceneName;
-     
-            public OnSceneLoadStartedEvent(string sceneName)
-            {
-                SceneName = sceneName;
-            }
+            SceneName = sceneName;
         }
-     
-        /// <summary>
-        /// Published by SceneLoader when a scene has fully loaded and the fade-in is complete.
-        /// Systems can react by resuming logic, showing UI, etc.
-        /// </summary>
-        public readonly struct OnSceneLoadCompletedEvent
+    }
+
+    /// <summary>
+    /// Published by SceneLoader when a scene has fully loaded and the fade-in is complete.
+    /// Systems can react by resuming logic, showing UI, etc.
+    /// </summary>
+    public readonly struct OnSceneLoadCompletedEvent
+    {
+        /// <summary>Name of the scene that finished loading.</summary>
+        public readonly string SceneName;
+
+        public OnSceneLoadCompletedEvent(string sceneName)
         {
-            /// <summary>Name of the scene that finished loading.</summary>
-            public readonly string SceneName;
-     
-            public OnSceneLoadCompletedEvent(string sceneName)
-            {
-                SceneName = sceneName;
-            }
+            SceneName = sceneName;
         }
-     
-        #endregion
-        
+    }
+
+    #endregion
+
     #region Camera Events
 
     /// <summary>
@@ -340,7 +346,7 @@ namespace MedMan.Core
     public readonly struct OnCameraReleaseRequestedEvent { }
 
     #endregion
-    
+
     #region Interaction Events
 
     /// <summary>Published when the player's raycast lands on or leaves an IInteractable.</summary>
@@ -363,7 +369,7 @@ namespace MedMan.Core
         public readonly InteractionType Type;
         public OnInteractionEndedEvent(InteractionType type) => Type = type;
     }
-    
+
     /// <summary>Published when the player begins an interaction requiring a camera view point.</summary>
     public readonly struct OnInteractionViewRequestedEvent
     {
@@ -375,7 +381,7 @@ namespace MedMan.Core
     public readonly struct OnInteractionViewExitedEvent { }
 
     #endregion
-    
+
     #region Narrative Events
 
     /// <summary>Published when a dialogue line begins displaying.</summary>
@@ -394,6 +400,54 @@ namespace MedMan.Core
 
     /// <summary>Published when the entire dialogue sequence finishes.</summary>
     public readonly struct OnDialogueSequenceEndedEvent { }
+
+    /// <summary>
+    /// Published when the player enters a named narrative zone trigger.
+    /// IdleMonologueSystem reacts by switching to the zone-specific line pool.
+    /// </summary>
+    public readonly struct OnNarrativeZoneEnteredEvent
+    {
+        /// <summary>Unique identifier of the zone. Must match a ZoneMonologue.zoneId in IdleMonologueSystem.</summary>
+        public readonly string ZoneId;
+
+        public OnNarrativeZoneEnteredEvent(string zoneId)
+        {
+            ZoneId = zoneId;
+        }
+    }
+
+    /// <summary>
+    /// Published when the player exits a narrative zone with no replacement zone active.
+    /// IdleMonologueSystem reacts by clearing the current zone.
+    /// </summary>
+    public readonly struct OnNarrativeZoneExitedEvent
+    {
+        public readonly string ZoneId;
+
+        public OnNarrativeZoneExitedEvent(string zoneId)
+        {
+            ZoneId = zoneId;
+        }
+    }
+
+    /// <summary>
+    /// Published when IdleMonologueSystem plays a location-specific idle line.
+    /// DialogueSystem or AudioManager can react by displaying or vocalising the line.
+    /// </summary>
+    public readonly struct OnIdleMonologuePlayedEvent
+    {
+        /// <summary>The text content of the line that was played.</summary>
+        public readonly string Line;
+
+        /// <summary>The zone in which the line was triggered.</summary>
+        public readonly string ZoneId;
+
+        public OnIdleMonologuePlayedEvent(string line, string zoneId)
+        {
+            Line   = line;
+            ZoneId = zoneId;
+        }
+    }
 
     #endregion
 }
