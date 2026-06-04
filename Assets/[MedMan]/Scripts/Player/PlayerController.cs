@@ -152,7 +152,10 @@ namespace MedMan.Player
         {
             if (_moveInput != Vector2.zero)
             {
-                _idleTimer = 0f;
+                if (_idleEventFired)
+                    EventBus.Publish(new OnPlayerMovedEvent());
+
+                _idleTimer      = 0f;
                 _idleEventFired = false;
                 return;
             }

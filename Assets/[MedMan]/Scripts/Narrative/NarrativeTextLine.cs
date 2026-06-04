@@ -42,6 +42,15 @@ namespace MedMan.Narrative
         // ─────────────────────────────────────────
 
         /// <summary>
+        /// Explicitly sets the controller reference.
+        /// Call this after Instantiate when GetComponentInParent cannot resolve it automatically.
+        /// </summary>
+        public void SetController(NarrativeTextController controller)
+        {
+            _controller = controller;
+        }
+
+        /// <summary>
         /// Sets the text content. Call before Show().
         /// </summary>
         public void Setup(string text)
