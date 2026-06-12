@@ -62,7 +62,7 @@ namespace MedMan.Core
                 CurrentDreamLevel  = _debugFearProfile.DreamLevel;
         
                 // Initialize PillSystem directly for debug purposes
-                var pillSystem = FindObjectOfType<PillSystem>();
+                var pillSystem = FindFirstObjectByType<PillSystem>();
                 pillSystem?.Initialize(_debugFearProfile);
         
                 Debug.Log($"[GameManager] Debug profile loaded: {_debugFearProfile.StateIDReadable}");

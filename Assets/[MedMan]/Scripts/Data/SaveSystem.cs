@@ -19,8 +19,9 @@ namespace MedMan.Data
         /// <summary>
         /// Absolute path to the save file on disk.
         /// Uses Application.persistentDataPath — writable on all platforms.
+        /// Computed lazily, not at class init, since Application API is unavailable then.
         /// </summary>
-        private static readonly string SaveFilePath =
+        private static string SaveFilePath =>
             System.IO.Path.Combine(Application.persistentDataPath, "medman_save.json");
 
         private void Awake()

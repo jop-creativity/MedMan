@@ -46,6 +46,12 @@ namespace MedMan.Interaction
         [ShowIf("_interactionType", InteractionType.Take)]
         [SerializeField] private int _amount = 1;
         
+        [BoxGroup("Interaction")]
+        [ShowIf("_interactionType", InteractionType.Use)]
+        [AllowNesting]
+        [Tooltip("Door component to toggle when interacted with.")]
+        [SerializeField] private OpenCloseDoor _doorController;
+        
  
 
         // ─────────────────────────────────────────
@@ -106,6 +112,9 @@ namespace MedMan.Interaction
             
             if (_hasSequence && _narrativeTextController != null)
                 _narrativeTextController.PlaySequence();
+            
+            if (_interactionType == InteractionType.Use)
+                _doorController?.Toggle();
         }
 
         /// <inheritdoc/>

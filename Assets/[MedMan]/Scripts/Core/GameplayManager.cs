@@ -12,6 +12,9 @@ namespace MedMan.Core
     public class GameplayManager : MonoBehaviour
     {
         public static GameplayManager Instance { get; private set; }
+        
+        //quick access to player object
+        public Transform Player;
 
         private void Awake()
         {
