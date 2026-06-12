@@ -448,6 +448,13 @@ namespace MedMan.Core
             ZoneId = zoneId;
         }
     }
+    
+    /// <summary>Published when a NarrativeSequencer finishes all its steps.</summary>
+    public readonly struct OnNarrativeSequenceEndedEvent
+    {
+        public readonly NarrativeTextController Controller;
+        public OnNarrativeSequenceEndedEvent(NarrativeTextController controller) => Controller = controller;
+    }
 
     #endregion
 }

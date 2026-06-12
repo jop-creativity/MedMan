@@ -287,7 +287,10 @@ namespace MedMan.Player
         }
 
         private void HandleAssistRequested(OnCameraAssistRequestedEvent e)
-            => AssistToward(e.TargetPosition, e.AssistStrength);
+        {
+            if (_isInInteractionMode) return; // Interaction mode takes priority
+            AssistToward(e.TargetPosition, e.AssistStrength);
+        }
 
         private void HandleLockRequested(OnCameraLockRequestedEvent e)
             => LockRotation(e.MaxHorizontalAngle, e.MaxVerticalAngle);

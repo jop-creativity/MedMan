@@ -21,6 +21,8 @@ namespace MedMan.Audio
         // ─────────────────────────────────────────
 
         public static AudioManager Instance { get; private set; }
+        
+        public enum AudioChannelType { Music, Ambient, SFX }
 
         private void Awake()
         {

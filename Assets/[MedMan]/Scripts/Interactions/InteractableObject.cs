@@ -1,6 +1,7 @@
 using UnityEngine;
 using MedMan.Core;
 using MedMan.Interaction;
+using MedMan.Narrative;
 using NaughtyAttributes;
 
 namespace MedMan.Interaction
@@ -28,6 +29,14 @@ namespace MedMan.Interaction
         [BoxGroup("Interaction")]
         [Tooltip("Empty GameObject positioned where the camera should move during interaction.")]
         [SerializeField] private Transform _interactionViewPoint;
+        
+        [BoxGroup("Interaction")]
+        [SerializeField] private bool _hasSequence;
+
+        [BoxGroup("Interaction")]
+        [ShowIf("_hasSequence")]
+        [AllowNesting]
+        [SerializeField] private NarrativeTextController _narrativeTextController;
 
         [BoxGroup("Pickup")]
         [ShowIf("_interactionType", InteractionType.Take)]
@@ -36,6 +45,8 @@ namespace MedMan.Interaction
         [BoxGroup("Pickup")]
         [ShowIf("_interactionType", InteractionType.Take)]
         [SerializeField] private int _amount = 1;
+        
+ 
 
         // ─────────────────────────────────────────
         // Properties — IInteractable
@@ -92,6 +103,9 @@ namespace MedMan.Interaction
 
             if (_interactionType == InteractionType.Take)
                 EventBus.Publish(new OnPickupPromptShownEvent(true));
+            
+            if (_hasSequence && _narrativeTextController != null)
+                _narrativeTextController.PlaySequence();
         }
 
         /// <inheritdoc/>

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using TMPro;
 using MedMan.Core;
+using MedMan.Audio;
 using NaughtyAttributes;
 
 namespace MedMan.Narrative
@@ -14,6 +15,8 @@ namespace MedMan.Narrative
     /// Supports multiple simultaneous per-character animations via TextAnimationType flags.
     /// Supports Text Accumulation mode — lines from the assigned DialogueLineSO are split by '|'
     /// and displayed one by one, each appended to the same TMP object with a configurable delay.
+    /// Supports inline Sequence mode — chains text, audio and camera assist steps automatically.
+    /// When HasSequence is true, sequence drives all display — single-line display is ignored.
     /// Can be triggered by zone entry (OnTriggerEnter) or called directly by DialogueSystem.
     /// All animation parameters are tweakable in the Inspector.
     /// Supports Edit Mode preview via [Button].
@@ -42,6 +45,67 @@ namespace MedMan.Narrative
         }
 
         // ─────────────────────────────────────────
+        // Nested types
+        // ─────────────────────────────────────────
+
+        /// <summary>
+        /// A single step in the inline narrative sequence.
+        /// All elements are optional — any combination may be active.
+        /// Camera assist strength: 0 = soft assist, 1 = hard lock (ViewPoint-style).
+        /// </summary>
+        [Serializable]
+        public class SequenceStep
+        {
+            [BoxGroup("Text")]
+            [Tooltip("Enable to display a dialogue line for this step.")]
+            public bool hasText;
+
+            [BoxGroup("Text")]
+            [ShowIf("hasText")]
+            [AllowNesting]
+            public DialogueLineSO dialogueLine;
+
+            [BoxGroup("Audio")]
+            [Tooltip("Enable to play an audio clip for this step.")]
+            public bool hasAudio;
+
+            [BoxGroup("Audio")]
+            [ShowIf("hasAudio")]
+            [AllowNesting]
+            public AudioClip audioClip;
+
+            [BoxGroup("Audio")]
+            [ShowIf("hasAudio")]
+            [AllowNesting]
+            public AudioChannelType audioChannel = AudioChannelType.SFX;
+
+            [BoxGroup("Camera Assist")]
+            [Tooltip("Enable to guide camera toward a scene target for this step.")]
+            public bool hasCameraAssist;
+
+            [BoxGroup("Camera Assist")]
+            [ShowIf("hasCameraAssist")]
+            [AllowNesting]
+            [Tooltip("Scene Transform the camera will look toward.")]
+            public Transform assistTarget;
+
+            [BoxGroup("Camera Assist")]
+            [ShowIf("hasCameraAssist")]
+            [AllowNesting]
+            [Range(0f, 1f)]
+            [Tooltip("0 = soft assist, 1 = hard lock (ViewPoint-style).")]
+            public float assistStrength = 0.3f;
+
+            [BoxGroup("Timing")]
+            [Tooltip("Delay in seconds before this step executes.")]
+            [Min(0f)]
+            public float delayBefore;
+        }
+
+        /// <summary>Audio channel used when playing a step's audio clip.</summary>
+        public enum AudioChannelType { Music, Ambient, SFX }
+
+        // ─────────────────────────────────────────
         // Properties — read by NarrativeTextLine
         // ─────────────────────────────────────────
 
@@ -61,8 +125,6 @@ namespace MedMan.Narrative
         // ShowIf helpers — animation type flags
         // ─────────────────────────────────────────
 
-        // NaughtyAttributes [ShowIf] does not support flags enum directly.
-        // These private bool properties are used as condition names in [ShowIf].
         private bool IsTypewriter     => (_animationType & TextAnimationType.Typewriter)     != 0;
         private bool IsFallingLetters => (_animationType & TextAnimationType.FallingLetters) != 0;
         private bool IsElectricShock  => (_animationType & TextAnimationType.ElectricShock)  != 0;
@@ -78,13 +140,26 @@ namespace MedMan.Narrative
                  "In Accumulation mode the localized string is split by '|' into separate lines.")]
         [SerializeField] private DialogueLineSO _dialogueLineSO;
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         [ShowNativeProperty]
-        private string PreviewPL => ResolveLocalePreview("pl");
+        private string PreviewPL => Application.isPlaying ? "(disabled in Play Mode)" : ResolveLocalePreview("pl");
 
         [ShowNativeProperty]
-        private string PreviewEN => ResolveLocalePreview("en");
-#endif
+        private string PreviewEN => Application.isPlaying ? "(disabled in Play Mode)" : ResolveLocalePreview("en");
+        #endif
+
+        // ─────────────────────────────────────────
+        // Fields — Sequence
+        // ─────────────────────────────────────────
+
+        [BoxGroup("Sequence")]
+        [Tooltip("Enable to use the inline sequence instead of single-line display.")]
+        [SerializeField] private bool _hasSequence;
+
+        [BoxGroup("Sequence")]
+        [ShowIf("_hasSequence")]
+        [ReorderableList]
+        [SerializeField] private SequenceStep[] _sequenceSteps = new SequenceStep[0];
 
         // ─────────────────────────────────────────
         // Fields — Zone Trigger
@@ -229,8 +304,7 @@ namespace MedMan.Narrative
 
         [BoxGroup("Text Accumulation")]
         [ShowIf("IsAccumulation")]
-        [Tooltip("If true, destroys this entire GameObject after all lines have faded out. " +
-                 "Use when this object exists solely to display text and is no longer needed.")]
+        [Tooltip("If true, destroys this entire GameObject after all lines have faded out.")]
         [SerializeField] private bool _destroyOnHide;
 
         // ─────────────────────────────────────────
@@ -264,6 +338,7 @@ namespace MedMan.Narrative
         private Coroutine   _displayCoroutine;
         private Coroutine   _tremorCoroutine;
         private Coroutine   _accumulationCoroutine;
+        private Coroutine   _sequenceCoroutine;
         private bool        _isDisplaying;
         private bool        _triggered;
         private AudioSource _audioSource;
@@ -323,7 +398,9 @@ namespace MedMan.Narrative
 
             _triggered = true;
 
-            if (IsAccumulation)
+            if (_hasSequence)
+                PlaySequence();
+            else if (IsAccumulation)
                 StartAccumulation();
             else
                 DisplayLine(_dialogueLineSO);
@@ -352,16 +429,33 @@ namespace MedMan.Narrative
 
         /// <summary>
         /// Displays the given dialogue line with the configured animation type.
+        /// Ignored if HasSequence is true.
         /// Publishes OnDialogueLineEndedEvent when complete.
         /// </summary>
         public void DisplayLine(DialogueLineSO line)
         {
+            if (_hasSequence) return;
             if (line == null) return;
 
             if (_displayCoroutine != null) StopCoroutine(_displayCoroutine);
             if (_tremorCoroutine  != null) StopCoroutine(_tremorCoroutine);
 
             _displayCoroutine = StartCoroutine(DisplayRoutine(line));
+        }
+
+        /// <summary>
+        /// Plays the inline sequence from the beginning.
+        /// Stops any currently running display or sequence first.
+        /// </summary>
+        public void PlaySequence()
+        {
+            if (!_hasSequence || _sequenceSteps == null || _sequenceSteps.Length == 0) return;
+
+            if (_sequenceCoroutine != null) StopCoroutine(_sequenceCoroutine);
+            if (_displayCoroutine  != null) StopCoroutine(_displayCoroutine);
+            if (_tremorCoroutine   != null) StopCoroutine(_tremorCoroutine);
+
+            _sequenceCoroutine = StartCoroutine(SequenceRoutine());
         }
 
         /// <summary>
@@ -372,6 +466,7 @@ namespace MedMan.Narrative
             if (_displayCoroutine      != null) StopCoroutine(_displayCoroutine);
             if (_tremorCoroutine       != null) StopCoroutine(_tremorCoroutine);
             if (_accumulationCoroutine != null) StopCoroutine(_accumulationCoroutine);
+            if (_sequenceCoroutine     != null) StopCoroutine(_sequenceCoroutine);
 
             _tmp.text             = string.Empty;
             _isDisplaying         = false;
@@ -425,7 +520,6 @@ namespace MedMan.Narrative
 
         /// <summary>
         /// Hides all spawned lines (fade out + destroy) and resets accumulation state.
-        /// If DestroyOnHide is enabled, also destroys this GameObject after all lines fade out.
         /// </summary>
         public void ResetAccumulation()
         {
@@ -462,12 +556,6 @@ namespace MedMan.Narrative
         {
             ClearText();
 
-            if (_dialogueLineSO == null)
-            {
-                Debug.LogWarning("[NarrativeTextController] No DialogueLineSO assigned.", this);
-                return;
-            }
-
             if (_tmp == null) _tmp = GetComponent<TextMeshPro>();
             ApplyStyle();
 
@@ -493,10 +581,9 @@ namespace MedMan.Narrative
             }
             else
             {
-                if (IsAccumulation)
-                    StartAccumulation();
-                else
-                    DisplayLine(_dialogueLineSO);
+                if (_hasSequence)      PlaySequence();
+                else if (IsAccumulation) StartAccumulation();
+                else                   DisplayLine(_dialogueLineSO);
             }
         }
 
@@ -506,6 +593,95 @@ namespace MedMan.Narrative
             if (_tmp == null) _tmp = GetComponent<TextMeshPro>();
             ClearText();
             Debug.Log("[NarrativeTextController] Text cleared.");
+        }
+
+        // ─────────────────────────────────────────
+        // Private methods — Sequence
+        // ─────────────────────────────────────────
+
+        /// <summary>
+        /// Iterates through all sequence steps.
+        /// Each step executes its active elements after its configured delay.
+        /// Text steps wait for the line to end before advancing to the next step.
+        /// </summary>
+        private IEnumerator SequenceRoutine()
+        {
+            Debug.Log($"[NarrativeTextController] Sequence started on {name}");
+
+            int stepIndex = 0;
+            foreach (SequenceStep step in _sequenceSteps)
+            {
+                if (step.delayBefore > 0f)
+                    yield return new WaitForSeconds(step.delayBefore);
+
+                ExecuteSequenceStep(step);
+
+                if (step.hasText && step.dialogueLine != null)
+                {
+                    bool lineEnded = false;
+                    void OnEnded(OnDialogueLineEndedEvent e)
+                    {
+                        if (e.Line == step.dialogueLine) lineEnded = true;
+                    }
+
+                    EventBus.Subscribe<OnDialogueLineEndedEvent>(OnEnded);
+                    yield return new WaitUntil(() => lineEnded);
+                    EventBus.Unsubscribe<OnDialogueLineEndedEvent>(OnEnded);
+                }
+
+                stepIndex++;
+                
+                // Release soft camera assist after this step completes (hard lock released elsewhere)
+                if (step.hasCameraAssist && step.assistTarget != null && !Mathf.Approximately(step.assistStrength, 1f))
+                {
+                    EventBus.Publish(new OnCameraReleaseRequestedEvent());
+                }
+            }
+
+            Debug.Log($"[NarrativeTextController] Sequence ended on {name}");
+            EventBus.Publish(new OnNarrativeSequenceEndedEvent(this));
+        }
+
+        /// <summary>
+        /// Executes all active elements for a single sequence step.
+        /// Camera assist strength 1.0 = hard lock via OnInteractionViewRequestedEvent.
+        /// </summary>
+        private void ExecuteSequenceStep(SequenceStep step)
+        {
+            // Text
+            if (step.hasText && step.dialogueLine != null)
+            {
+                if (_displayCoroutine != null) StopCoroutine(_displayCoroutine);
+                if (_tremorCoroutine  != null) StopCoroutine(_tremorCoroutine);
+                _displayCoroutine = StartCoroutine(DisplayRoutine(step.dialogueLine));
+            }
+
+            // Audio
+            if (step.hasAudio && step.audioClip != null && AudioManager.Instance != null)
+            {
+                switch (step.audioChannel)
+                {
+                    case AudioChannelType.Music:
+                        AudioManager.Instance.PlayMusic(step.audioClip);
+                        break;
+                    case AudioChannelType.Ambient:
+                        AudioManager.Instance.PlayAmbient(step.audioClip);
+                        break;
+                    case AudioChannelType.SFX:
+                        AudioManager.Instance.PlaySFX(step.audioClip);
+                        break;
+                }
+            }
+
+            // Camera assist — strength 1 = hard lock
+            if (step.hasCameraAssist && step.assistTarget != null)
+            {
+                if (Mathf.Approximately(step.assistStrength, 1f))
+                    EventBus.Publish(new OnInteractionViewRequestedEvent(step.assistTarget));
+                else
+                    EventBus.Publish(new OnCameraAssistRequestedEvent(
+                        step.assistTarget.position, step.assistStrength));
+            }
         }
 
         // ─────────────────────────────────────────
@@ -595,18 +771,12 @@ namespace MedMan.Narrative
         // Private methods — Text Accumulation
         // ─────────────────────────────────────────
 
-        /// <summary>
-        /// Fetches the localized string, splits by '|', then spawns a NarrativeTextLine
-        /// prefab for each line. Each line is positioned above the previous by _lineOffset.
-        /// </summary>
         private IEnumerator AccumulationSequenceCor()
         {
-            // Fetch localized string at runtime
             var op = _dialogueLineSO.LocalizedText.GetLocalizedStringAsync();
             yield return op;
             string fullText = op.Result;
 
-            // Parse into lines
             _parsedLines.Clear();
             foreach (string part in fullText.Split('|'))
             {
@@ -615,15 +785,12 @@ namespace MedMan.Narrative
                     _parsedLines.Add(trimmed);
             }
 
-            // Spawn line by line
             for (int i = 0; i < _parsedLines.Count; i++)
             {
-                // Position: each new line spawns at base position + offset * index
                 Vector3 spawnPos = transform.position + transform.up * (_lineOffset * i);
                 NarrativeTextLine lineObj = Instantiate(_linePrefab, spawnPos, transform.rotation, transform);
 
                 lineObj.Setup(_parsedLines[i]);
-
                 lineObj.Show();
                 _spawnedLines.Add(lineObj);
 
@@ -633,9 +800,6 @@ namespace MedMan.Narrative
             _accumulationComplete = true;
         }
 
-        /// <summary>
-        /// Waits until the player is not looking at this object, then resets accumulation.
-        /// </summary>
         private IEnumerator AccumulationClearWhenNotVisibleCor()
         {
             while (_visibilityChecker != null && _visibilityChecker.IsVisibleToPlayer)
@@ -644,10 +808,6 @@ namespace MedMan.Narrative
             ResetAccumulation();
         }
 
-        /// <summary>
-        /// Waits for the fade out duration then destroys this GameObject.
-        /// Used when DestroyOnHide is enabled.
-        /// </summary>
         private IEnumerator DestroyAfterFadeOutCor()
         {
             yield return new WaitForSeconds(_animationFadeInDuration + 0.1f);
@@ -655,14 +815,14 @@ namespace MedMan.Narrative
         }
 
         // ─────────────────────────────────────────
-        // Private methods — Animations
-        // ─────────────────────────────────────────
-
-        // ─────────────────────────────────────────
         // Internal methods — Animations (shared with NarrativeTextLine)
         // ─────────────────────────────────────────
 
-        /// <summary>Animates each letter falling from above into position on the given TMP.</summary>
+         /// <summary>
+        /// Animates each letter falling from above into position on the given TMP.
+        /// ForceMeshUpdate is called once before the loop — subsequent frames reuse
+        /// the cached textInfo and only call UpdateVertexData for performance.
+        /// </summary>
         internal IEnumerator FallingLettersRoutine(TextMeshPro tmp)
         {
             tmp.ForceMeshUpdate();
@@ -726,18 +886,24 @@ namespace MedMan.Narrative
             }
         }
 
-        /// <summary>Snaps each letter into view with a rapid positional jolt on the given TMP.</summary>
+        /// <summary>
+        /// Snaps each letter into view with a rapid positional jolt on the given TMP.
+        /// ForceMeshUpdate is called once before the loop — offsets are applied
+        /// relative to cached original vertices and re-applied via UpdateVertexData only.
+        /// </summary>
         internal IEnumerator ElectricShockRoutine(TextMeshPro tmp)
         {
             tmp.ForceMeshUpdate();
             TMP_TextInfo textInfo = tmp.textInfo;
             int charCount = textInfo.characterCount;
 
+            // Cache original vertex positions — offsets are always relative to these
+            Vector3[][] originalVertices = new Vector3[textInfo.meshInfo.Length][];
+            for (int m = 0; m < textInfo.meshInfo.Length; m++)
+                originalVertices[m] = (Vector3[])textInfo.meshInfo[m].vertices.Clone();
+
             for (int iter = 0; iter < _shockIterations; iter++)
             {
-                tmp.ForceMeshUpdate();
-                textInfo = tmp.textInfo;
-
                 for (int i = 0; i < charCount; i++)
                 {
                     TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
@@ -751,8 +917,8 @@ namespace MedMan.Narrative
 
                     for (int v = 0; v < 4; v++)
                     {
-                        verts[vert + v].x += offsetX * tmp.fontSize * 0.001f;
-                        verts[vert + v].y += offsetY * tmp.fontSize * 0.001f;
+                        verts[vert + v].x = originalVertices[mesh][vert + v].x + offsetX * tmp.fontSize * 0.001f;
+                        verts[vert + v].y = originalVertices[mesh][vert + v].y + offsetY * tmp.fontSize * 0.001f;
                     }
                 }
 
@@ -760,19 +926,49 @@ namespace MedMan.Narrative
                 yield return new WaitForSeconds(_shockInterval);
             }
 
+            // Settle back to original positions
             float elapsed = 0f;
             while (elapsed < _shockSettleDuration)
             {
                 elapsed += Time.deltaTime;
-                tmp.ForceMeshUpdate();
+                float t = Mathf.Clamp01(elapsed / _shockSettleDuration);
+
+                for (int i = 0; i < charCount; i++)
+                {
+                    TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
+                    if (!charInfo.isVisible) continue;
+
+                    int mesh = charInfo.materialReferenceIndex;
+                    int vert = charInfo.vertexIndex;
+                    Vector3[] verts = textInfo.meshInfo[mesh].vertices;
+
+                    for (int v = 0; v < 4; v++)
+                    {
+                        verts[vert + v].x = Mathf.Lerp(verts[vert + v].x, originalVertices[mesh][vert + v].x, t);
+                        verts[vert + v].y = Mathf.Lerp(verts[vert + v].y, originalVertices[mesh][vert + v].y, t);
+                    }
+                }
+
                 tmp.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
                 yield return null;
             }
         }
 
-        /// <summary>Continuously shakes each letter on the given TMP.</summary>
+        /// <summary>
+        /// Continuously shakes each letter on the given TMP.
+        /// ForceMeshUpdate is called once before the loop — per-frame jitter is applied
+        /// relative to cached original vertices and re-applied via UpdateVertexData only.
+        /// </summary>
         internal IEnumerator TremorRoutine(TextMeshPro tmp)
         {
+            tmp.ForceMeshUpdate();
+            TMP_TextInfo textInfo = tmp.textInfo;
+
+            // Cache original vertex positions — jitter is always relative to these
+            Vector3[][] originalVertices = new Vector3[textInfo.meshInfo.Length][];
+            for (int m = 0; m < textInfo.meshInfo.Length; m++)
+                originalVertices[m] = (Vector3[])textInfo.meshInfo[m].vertices.Clone();
+
             float elapsed = 0f;
 
             while (true)
@@ -782,9 +978,6 @@ namespace MedMan.Narrative
                     : 1f;
 
                 elapsed += Time.deltaTime;
-
-                tmp.ForceMeshUpdate();
-                TMP_TextInfo textInfo = tmp.textInfo;
 
                 for (int i = 0; i < textInfo.characterCount; i++)
                 {
@@ -804,9 +997,9 @@ namespace MedMan.Narrative
 
                     for (int v = 0; v < 4; v++)
                     {
-                        verts[vert + v].x  += ox;
-                        verts[vert + v].y  += oy;
-                        colors[vert + v].a  = (byte)(fadeProgress * 255);
+                        verts[vert + v].x  = originalVertices[mesh][vert + v].x + ox;
+                        verts[vert + v].y  = originalVertices[mesh][vert + v].y + oy;
+                        colors[vert + v].a = (byte)(fadeProgress * 255);
                     }
                 }
 
@@ -852,14 +1045,11 @@ namespace MedMan.Narrative
 
         private void HandleLineStarted(OnDialogueLineStartedEvent e)
         {
+            if (_hasSequence) return;
             DisplayLine(e.Line);
         }
 
 #if UNITY_EDITOR
-        /// <summary>
-        /// Resolves the localized string for the given locale code in Edit Mode.
-        /// Used by ShowNativeProperty preview fields.
-        /// </summary>
         private string ResolveLocalePreview(string localeCode)
         {
             if (_dialogueLineSO == null) return "(no DialogueLineSO)";
