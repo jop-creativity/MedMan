@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Serialization;
+using NaughtyAttributes;
 
 namespace MedMan.Core
 {
@@ -12,9 +14,14 @@ namespace MedMan.Core
     public class GameplayManager : MonoBehaviour
     {
         public static GameplayManager Instance { get; private set; }
-        
-        //quick access to player object
-        public Transform Player;
+
+        [BoxGroup("References")]
+        [Tooltip("Quick access to the player object.")]
+        [FormerlySerializedAs("Player")]
+        [SerializeField] private Transform _player;
+
+        /// <summary>The active player transform. Assigned in the Inspector.</summary>
+        public Transform Player => _player;
 
         private void Awake()
         {

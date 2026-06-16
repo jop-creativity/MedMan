@@ -169,12 +169,12 @@ namespace MedMan.Core
     #region Skill Events
 
     /// <summary>
-    /// Published when the player unlocks a traversal skill on a hard path.
+    /// Published when the player unlocks a new skill on a hard path.
     /// SaveSystem records the unlocked skill so it persists across levels.
     /// </summary>
     public readonly struct OnSkillUnlockedEvent
     {
-        /// <summary>Identifier of the unlocked skill (e.g. "ObjectRotation", "Swimming").</summary>
+        /// <summary>The unlocked skill. Persists across levels via SaveSystem.</summary>
         public readonly string SkillID;
 
         public OnSkillUnlockedEvent(string skillID)

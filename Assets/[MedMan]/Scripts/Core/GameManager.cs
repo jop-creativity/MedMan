@@ -161,8 +161,7 @@ namespace MedMan.Core
             else
                 EventBus.Publish(new OnLevelReadyToPlayEvent(CurrentStateID));
 
-            // Autosave on every state change
-            SaveSystem.Instance?.Save();
+            // Autosave is handled by SaveSystem reacting to OnGameStateChangedEvent (published above).
         }
 
         // ─────────────────────────────────────────

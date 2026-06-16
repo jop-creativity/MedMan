@@ -67,8 +67,10 @@ namespace MedMan.Core
         Hard
     }
     
-    // Interaction types — used by IInteractable and InteractionCursor.
-    // Add new values here to extend the cursor system with new interaction states.
+    /// <summary>
+    /// Interaction types — used by IInteractable and InteractionCursor.
+    /// Add new values here to extend the cursor system with new interaction states.
+    /// </summary>
     public enum InteractionType
     {
         None,
@@ -78,8 +80,10 @@ namespace MedMan.Core
         Take    // Pick up an object from the world
     }
     
-    // Pickup types — used by PickupObject to identify what was collected.
-    // Add new values here to extend the pickup system.
+    /// <summary>
+    /// Pickup types — used by PickupObject to identify what was collected.
+    /// Add new values here to extend the pickup system.
+    /// </summary>
     public enum PickupType
     {
         None,

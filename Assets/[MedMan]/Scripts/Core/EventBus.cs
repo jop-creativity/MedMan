@@ -47,7 +47,9 @@ namespace MedMan.Core
 
         /// <summary>
         /// Publishes an event to all subscribers.
-        /// Events are structs — zero heap allocation, zero GC pressure.
+        /// The payload is a struct (no boxing). A defensive copy of the handler set is
+        /// allocated per publish to allow safe (un)subscription during iteration —
+        /// acceptable for the current low-frequency events.
         /// </summary>
         public static void Publish<T>(T eventData) where T : struct
         {

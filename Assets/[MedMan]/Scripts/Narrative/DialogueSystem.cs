@@ -17,6 +17,10 @@ namespace MedMan.Narrative
         // Fields
         // ─────────────────────────────────────────
 
+        [BoxGroup("References")]
+        [Tooltip("Controller that displays each queued line. Driven directly — no global broadcast.")]
+        [SerializeField] private NarrativeTextController _narrativeTextController;
+        
         [BoxGroup("Debug")]
         [ReadOnly]
         [SerializeField] private int _queueCount;
@@ -125,10 +129,17 @@ namespace MedMan.Narrative
                 Debug.Log("[DialogueSystem] Sequence ended.");
                 return;
             }
-
+            
             _isPlaying = true;
             DialogueLineSO next = _queue.Dequeue();
             _queueCount = _queue.Count;
+
+            // Drive display directly on the assigned controller — no global broadcast.
+            // The event below stays a pure notification for future audio/subtitle consumers.
+            if (_narrativeTextController != null)
+                _narrativeTextController.DisplayLine(next);
+            else
+                Debug.LogWarning("[DialogueSystem] No NarrativeTextController assigned — line will not display.", this);
 
             EventBus.Publish(new OnDialogueLineStartedEvent(next));
             Debug.Log($"[DialogueSystem] Playing: {next.name} — {_queue.Count} remaining");

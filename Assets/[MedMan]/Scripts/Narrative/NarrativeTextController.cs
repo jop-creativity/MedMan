@@ -77,7 +77,7 @@ namespace MedMan.Narrative
             [BoxGroup("Audio")]
             [ShowIf("hasAudio")]
             [AllowNesting]
-            public AudioChannelType audioChannel = AudioChannelType.SFX;
+            public AudioManager.AudioChannelType audioChannel = AudioManager.AudioChannelType.SFX;
 
             [BoxGroup("Camera Assist")]
             [Tooltip("Enable to guide camera toward a scene target for this step.")]
@@ -101,9 +101,6 @@ namespace MedMan.Narrative
             [Min(0f)]
             public float delayBefore;
         }
-
-        /// <summary>Audio channel used when playing a step's audio clip.</summary>
-        public enum AudioChannelType { Music, Ambient, SFX }
 
         // ─────────────────────────────────────────
         // Properties — read by NarrativeTextLine
@@ -370,16 +367,6 @@ namespace MedMan.Narrative
             _visibilityChecker = GetComponent<PlayerVisibilityChecker>();
         }
 
-        private void OnEnable()
-        {
-            EventBus.Subscribe<OnDialogueLineStartedEvent>(HandleLineStarted);
-        }
-
-        private void OnDisable()
-        {
-            EventBus.Unsubscribe<OnDialogueLineStartedEvent>(HandleLineStarted);
-        }
-
         private void OnValidate()
         {
             if (_hasAudio && _audioClip == null && _dialogueLineSO != null && _dialogueLineSO.HasAudio)
@@ -625,8 +612,16 @@ namespace MedMan.Narrative
                     }
 
                     EventBus.Subscribe<OnDialogueLineEndedEvent>(OnEnded);
-                    yield return new WaitUntil(() => lineEnded);
-                    EventBus.Unsubscribe<OnDialogueLineEndedEvent>(OnEnded);
+                    try
+                    {
+                        yield return new WaitUntil(() => lineEnded);
+                    }
+                    finally
+                    {
+                        // Runs even if the coroutine is stopped mid-wait (ClearText / PlaySequence) —
+                        // prevents the closure leaking into EventBus.
+                        EventBus.Unsubscribe<OnDialogueLineEndedEvent>(OnEnded);
+                    }
                 }
 
                 stepIndex++;
@@ -661,13 +656,13 @@ namespace MedMan.Narrative
             {
                 switch (step.audioChannel)
                 {
-                    case AudioChannelType.Music:
+                    case AudioManager.AudioChannelType.Music:
                         AudioManager.Instance.PlayMusic(step.audioClip);
                         break;
-                    case AudioChannelType.Ambient:
+                    case AudioManager.AudioChannelType.Ambient:
                         AudioManager.Instance.PlayAmbient(step.audioClip);
                         break;
-                    case AudioChannelType.SFX:
+                    case AudioManager.AudioChannelType.SFX:
                         AudioManager.Instance.PlaySFX(step.audioClip);
                         break;
                 }

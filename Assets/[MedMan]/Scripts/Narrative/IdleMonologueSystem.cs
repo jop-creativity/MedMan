@@ -71,6 +71,7 @@ namespace MedMan.Narrative
         private Coroutine _idleCoroutine;
         private Coroutine _visibilityCoroutine;
         private NarrativeTextLine _activeLine;
+        private Material          _activeLineMaterial;
 
         // ── Unity Lifecycle ──────────────────────────────────────────────────
 
@@ -155,6 +156,7 @@ namespace MedMan.Narrative
                 mat.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
                 mat.renderQueue = 4000;
                 tmp.fontMaterial = mat;
+                _activeLineMaterial = mat;
             }
 
             _activeLine.Setup(line.LocalizedText.GetLocalizedString());
@@ -192,11 +194,24 @@ namespace MedMan.Narrative
                 _activeLine.Hide();
                 _activeLine = null;
             }
+
+            // Destroy the per-spawn always-on-top material after the line's fade-out completes.
+            // Delay must outlast NarrativeTextLine's fade so it is not destroyed mid-render.
+            if (_activeLineMaterial != null)
+            {
+                float fadeBuffer = (_narrativeController != null
+                    ? _narrativeController.AnimationFadeInDuration
+                    : 0.4f) + 0.1f;
+                Destroy(_activeLineMaterial, fadeBuffer);
+                _activeLineMaterial = null;
+            }
         }
 
 #if UNITY_EDITOR
         private string ResolvePreview(int index)
         {
+            if (Application.isPlaying) return "(disabled in Play Mode)";
+            
             if (_dialogueLines == null || index >= _dialogueLines.Length || _dialogueLines[index] == null)
                 return "-";
 

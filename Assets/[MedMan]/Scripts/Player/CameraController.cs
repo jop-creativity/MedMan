@@ -13,7 +13,7 @@ namespace MedMan.Player
     /// Uses direct InputAction.ReadValue each frame — avoids Input System callback jitter.
     /// Attach to the Camera GameObject (child of Player).
     /// </summary>
-    public class CameraController : MonoBehaviour, IControllable, ILookControllable
+    public class CameraController : MonoBehaviour, ILookControllable
     {
         // ─────────────────────────────────────────
         // Fields
@@ -62,13 +62,9 @@ namespace MedMan.Player
         private bool _isLocked;
         private bool _isInInteractionMode;
         private bool _isAssisting;
-        private bool _isRotationLocked;
         private bool _isTweening;
-        private bool _skipNextFrame;
         
         private float _assistStrength;
-        private float _lockHorizontal;
-        private float _lockVertical;
         private float _anchorVerticalRotation;
         
         private Quaternion _lockBaseRotation;
@@ -168,19 +164,15 @@ namespace MedMan.Player
         /// <inheritdoc/>
         public void LockRotation(float maxHorizontalAngle, float maxVerticalAngle)
         {
-            _isRotationLocked = true;
             _isLocked         = true;
-            _lockHorizontal   = maxHorizontalAngle;
-            _lockVertical     = maxVerticalAngle;
             _lockBaseRotation = transform.rotation;
             Debug.Log($"[CameraController] Rotation locked H:{maxHorizontalAngle} V:{maxVerticalAngle}");
         }
 
         /// <inheritdoc/>
-        public void Releaselock()
+        public void ReleaseLock()
         {
             _isAssisting      = false;
-            _isRotationLocked = false;
             _isLocked         = false;
             Debug.Log("[CameraController] Lock released.");
         }
@@ -224,33 +216,8 @@ namespace MedMan.Player
 
             _verticalRotation = Mathf.Clamp(_verticalRotation, _verticalLookMin, _verticalLookMax);
 
-            if (_isRotationLocked)
-            {
-                ApplyRotationLock(mouseX);
-                return;
-            }
-
             transform.localRotation = Quaternion.Euler(_verticalRotation, 0f, 0f);
             _playerTransform.Rotate(Vector3.up * mouseX);
-        }
-
-        /// <summary>
-        /// Clamps player and camera rotation within lock angles relative to base rotation.
-        /// </summary>
-        private void ApplyRotationLock(float mouseX)
-        {
-            _playerTransform.Rotate(Vector3.up * mouseX);
-
-            float horizontalDelta = Quaternion.Angle(
-                new Quaternion(0, _lockBaseRotation.y, 0, _lockBaseRotation.w),
-                new Quaternion(0, _playerTransform.rotation.y, 0, _playerTransform.rotation.w)
-            );
-
-            if (horizontalDelta > _lockHorizontal)
-                _playerTransform.rotation = _lockBaseRotation;
-
-            _verticalRotation = Mathf.Clamp(_verticalRotation, -_lockVertical, _lockVertical);
-            transform.localRotation = Quaternion.Euler(_verticalRotation, 0f, 0f);
         }
 
         /// <summary>
@@ -271,7 +238,6 @@ namespace MedMan.Player
         private void SubscribeToEvents()
         {
             EventBus.Subscribe<OnCameraAssistRequestedEvent>(HandleAssistRequested);
-            EventBus.Subscribe<OnCameraLockRequestedEvent>(HandleLockRequested);
             EventBus.Subscribe<OnCameraReleaseRequestedEvent>(HandleReleaseRequested);
             EventBus.Subscribe<OnInteractionViewRequestedEvent>(HandleInteractionViewRequested);
             EventBus.Subscribe<OnInteractionViewExitedEvent>(HandleInteractionViewExited);
@@ -280,7 +246,6 @@ namespace MedMan.Player
         private void UnsubscribeFromEvents()
         {
             EventBus.Unsubscribe<OnCameraAssistRequestedEvent>(HandleAssistRequested);
-            EventBus.Unsubscribe<OnCameraLockRequestedEvent>(HandleLockRequested);
             EventBus.Unsubscribe<OnCameraReleaseRequestedEvent>(HandleReleaseRequested);
             EventBus.Unsubscribe<OnInteractionViewRequestedEvent>(HandleInteractionViewRequested);
             EventBus.Unsubscribe<OnInteractionViewExitedEvent>(HandleInteractionViewExited);
@@ -292,11 +257,8 @@ namespace MedMan.Player
             AssistToward(e.TargetPosition, e.AssistStrength);
         }
 
-        private void HandleLockRequested(OnCameraLockRequestedEvent e)
-            => LockRotation(e.MaxHorizontalAngle, e.MaxVerticalAngle);
-
         private void HandleReleaseRequested(OnCameraReleaseRequestedEvent e)
-            => Releaselock();
+            => ReleaseLock();
         
         private void HandleInteractionViewRequested(OnInteractionViewRequestedEvent e)
     => EnterInteractionMode(e.ViewPoint);
@@ -350,7 +312,7 @@ namespace MedMan.Player
             if (!_isInInteractionMode) return;
             _isInInteractionMode = false;
 
-            Releaselock();
+            ReleaseLock();
 
             _isTweening = true;
             transform.DOMove(_anchorWorldPosition, _interactionTweenDuration).SetEase(Ease.InOutSine);

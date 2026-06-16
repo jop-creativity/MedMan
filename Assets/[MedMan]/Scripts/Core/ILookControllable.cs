@@ -27,7 +27,7 @@ namespace MedMan.Core
         /// <summary>
         /// Releases any active camera assist or rotation lock.
         /// </summary>
-        void Releaselock();
+        void ReleaseLock();
 
         /// <summary>Whether camera is currently locked or assisted toward a target.</summary>
         bool IsLocked { get; }

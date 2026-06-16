@@ -28,15 +28,19 @@ namespace MedMan.Player
 
         [BoxGroup("Idle Detection")]
         [SerializeField] private float _idleThreshold = 30f;
+        
+        private const float Gravity = -9.81f;
+        private const float MoveDeadzoneSqr = 0.01f; // (~0.1 input magnitude)²
 
         private CharacterController _characterController;
         private InputAction _moveAction;
         private InputAction _sprintAction;
         private Vector2 _moveInput;
-        private bool _isSprinting;
         private float _idleTimer;
+        private float _verticalVelocity;
         private bool _isControlEnabled = true;
         private bool _idleEventFired;
+        private bool _isSprinting;
 
         // ─────────────────────────────────────────
         // Properties — IControllable
@@ -128,19 +132,28 @@ namespace MedMan.Player
 
         /// <summary>
         /// Moves the player based on current input and sprint state.
-        /// Clamps diagonal movement to magnitude 1.
-        /// Applies gravity manually as CharacterController does not include it.
+        /// Horizontal input is clamped to magnitude 1 (no diagonal speed boost).
+        /// Gravity is accumulated into a separate vertical velocity and applied once —
+        /// CharacterController does not apply gravity itself. A small downward bias
+        /// while grounded keeps the controller pinned to the floor.
         /// </summary>
         private void HandleMovement()
         {
             float speed = _isSprinting ? _sprintSpeed : _walkSpeed;
 
-            Vector3 move = new Vector3(_moveInput.x, 0f, _moveInput.y);
-            move = Vector3.ClampMagnitude(move, 1f);
-            move = transform.TransformDirection(move) * speed;
-            move.y -= 9.81f * Time.deltaTime;
+            Vector3 horizontal = new Vector3(_moveInput.x, 0f, _moveInput.y);
+            horizontal = Vector3.ClampMagnitude(horizontal, 1f);
+            horizontal = transform.TransformDirection(horizontal) * speed;
 
-            _characterController.Move(move * Time.deltaTime);
+            if (_characterController.isGrounded && _verticalVelocity < 0f)
+                _verticalVelocity = -1f;
+            else
+                _verticalVelocity += Gravity * Time.deltaTime;
+
+            Vector3 velocity = horizontal;
+            velocity.y = _verticalVelocity;
+
+            _characterController.Move(velocity * Time.deltaTime);
         }
 
         /// <summary>
@@ -150,7 +163,8 @@ namespace MedMan.Player
         /// </summary>
         private void HandleIdleDetection()
         {
-            if (_moveInput != Vector2.zero)
+            // Deadzone compare instead of exact zero — analog sticks rarely return Vector2.zero
+            if (_moveInput.sqrMagnitude > MoveDeadzoneSqr)
             {
                 if (_idleEventFired)
                     EventBus.Publish(new OnPlayerMovedEvent());

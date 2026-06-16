@@ -96,16 +96,15 @@ namespace MedMan.Visual
 
         private void OnEnable()
         {
-            EventBus.Subscribe<OnGameStateChangedEvent>(OnGameStateChanged);
-            EventBus.Subscribe<OnPillConsumedEvent>(OnPillConsumed);
-            EventBus.Subscribe<OnPillExpiredEvent>(OnPillExpired);
+            // Register with VisualManager — it owns visual-state routing and drives this mechanism.
+            // Self-registration (not an Inspector ref) because VisualManager is a DontDestroyOnLoad
+            // singleton while this lives per-scene with the Global Volume.
+            VisualManager.Instance?.RegisterVolumeTransition(this);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<OnGameStateChangedEvent>(OnGameStateChanged);
-            EventBus.Unsubscribe<OnPillConsumedEvent>(OnPillConsumed);
-            EventBus.Unsubscribe<OnPillExpiredEvent>(OnPillExpired);
+            VisualManager.Instance?.UnregisterVolumeTransition(this);
         }
 
         private void OnDestroy()
@@ -178,6 +177,50 @@ namespace MedMan.Visual
                 _currentProfileName = profile.name;
             });
         }
+        
+        /// <summary>
+        /// Applies the Volume Profile mapped to the given game state.
+        /// Ignored while a pill effect is active (pill profile takes priority).
+        /// Called by VisualManager on state change.
+        /// </summary>
+        public void ApplyStateProfile(MedMan.Core.GameState state)
+        {
+            if (_pillActive) return;
+
+            if (_profileMap.TryGetValue(state, out VolumeProfile profile))
+            {
+                _baseGameStateProfile = profile;
+                TransitionToProfile(profile);
+            }
+        }
+
+        /// <summary>Transitions to the pill-active profile (fast onset). Called by VisualManager.</summary>
+        public void ApplyPillProfile()
+        {
+            if (_pillActiveProfile == null) return;
+
+            _pillActive = true;
+            TransitionToProfile(_pillActiveProfile, 0.3f);
+        }
+
+        /// <summary>
+        /// Begins the pill fade-out, then returns to the base state profile. Called by VisualManager.
+        /// </summary>
+        public void ApplyPillExpiry()
+        {
+            _pillActive = false;
+
+            if (_pillFadeOutProfile != null)
+            {
+                TransitionToProfile(_pillFadeOutProfile, 0.5f);
+                StartCoroutine(ReturnToBaseAfterFadeOutCor());
+            }
+            else if (_baseGameStateProfile != null)
+            {
+                TransitionToProfile(_baseGameStateProfile, _pillFadeOutDuration);
+            }
+        }
+        
 
         // ── Private Methods ──────────────────────────────────────────────────
 
@@ -208,44 +251,6 @@ namespace MedMan.Visual
             // Global starts as active (holds current profile), transition starts as inactive
             _activeVolume   = _globalVolume;
             _inactiveVolume = _transitionVolume;
-        }
-
-        private void OnGameStateChanged(OnGameStateChangedEvent e)
-        {
-            // Don't override pill effect if currently active
-            if (_pillActive) return;
-
-            if (_profileMap.TryGetValue(e.NewState, out VolumeProfile profile))
-            {
-                _baseGameStateProfile = profile;
-                TransitionToProfile(profile);
-            }
-        }
-
-        private void OnPillConsumed(OnPillConsumedEvent e)
-        {
-            if (_pillActiveProfile == null) return;
-
-            _pillActive = true;
-            TransitionToProfile(_pillActiveProfile, 0.3f); // Fast onset
-        }
-
-        private void OnPillExpired(OnPillExpiredEvent e)
-        {
-            _pillActive = false;
-
-            // First transition to fade-out profile (agitated), then return to base state
-            if (_pillFadeOutProfile != null)
-            {
-                TransitionToProfile(_pillFadeOutProfile, 0.5f);
-                StartCoroutine(ReturnToBaseAfterFadeOutCor());
-            }
-            else
-            {
-                // No fade-out profile — return directly to base state
-                if (_baseGameStateProfile != null)
-                    TransitionToProfile(_baseGameStateProfile, _pillFadeOutDuration);
-            }
         }
 
         private IEnumerator ReturnToBaseAfterFadeOutCor()
