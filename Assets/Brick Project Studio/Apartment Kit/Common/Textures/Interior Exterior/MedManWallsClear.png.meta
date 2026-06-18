@@ -1,12 +1,5 @@
 fileFormatVersion: 2
-guid: 1b1d6a4d760591e49b71fd4d6e2cc5f9
-AssetOrigin:
-  serializedVersion: 1
-  productId: 124055
-  packageName: Apartment Kit
-  packageVersion: 4.2
-  assetPath: Assets/Brick Project Studio/Apartment Kit/Common/Textures/Interior Exterior/Int_Apt_01_A.png
-  uploadId: 594248
+guid: d8f0bdd8b1db1da419dbf2af6b4ab065
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
