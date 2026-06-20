@@ -76,7 +76,7 @@ namespace MedMan.Core
         None,
         Examine,
         Rotate,
-        Use,
+        OpenClose,
         Take    // Pick up an object from the world
     }
     

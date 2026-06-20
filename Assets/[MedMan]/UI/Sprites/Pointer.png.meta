@@ -100,10 +100,10 @@ TextureImporter:
       name: Pointer_0
       rect:
         serializedVersion: 2
-        x: 79
-        y: 536
-        width: 21
-        height: 17
+        x: 55
+        y: 509
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -122,12 +122,12 @@ TextureImporter:
       name: Pointer_1
       rect:
         serializedVersion: 2
-        x: 160
-        y: 537
-        width: 31
-        height: 25
+        x: 142
+        y: 515
+        width: 70
+        height: 70
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -144,10 +144,10 @@ TextureImporter:
       name: Pointer_2
       rect:
         serializedVersion: 2
-        x: 239
-        y: 536
-        width: 44
-        height: 36
+        x: 226
+        y: 522
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,10 +166,10 @@ TextureImporter:
       name: Pointer_3
       rect:
         serializedVersion: 2
-        x: 312
-        y: 536
-        width: 51
-        height: 42
+        x: 303
+        y: 525
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -188,10 +188,10 @@ TextureImporter:
       name: Pointer_4
       rect:
         serializedVersion: 2
-        x: 402
-        y: 535
-        width: 51
-        height: 45
+        x: 390
+        y: 526
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -210,10 +210,10 @@ TextureImporter:
       name: Pointer_5
       rect:
         serializedVersion: 2
-        x: 480
-        y: 533
-        width: 57
-        height: 47
+        x: 470
+        y: 527
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -232,10 +232,10 @@ TextureImporter:
       name: Pointer_6
       rect:
         serializedVersion: 2
-        x: 574
-        y: 536
-        width: 53
-        height: 48
+        x: 564
+        y: 528
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -254,10 +254,10 @@ TextureImporter:
       name: Pointer_7
       rect:
         serializedVersion: 2
-        x: 653
-        y: 535
-        width: 62
-        height: 53
+        x: 643
+        y: 531
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -276,10 +276,10 @@ TextureImporter:
       name: Pointer_8
       rect:
         serializedVersion: 2
-        x: 726
-        y: 531
-        width: 85
-        height: 69
+        x: 735
+        y: 533
+        width: 70
+        height: 70
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

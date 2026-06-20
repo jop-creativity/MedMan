@@ -10,7 +10,7 @@ namespace MedMan.Interaction
     /// Distance/raycast checks are handled by InteractionSystem — this component
     /// only plays the animation and tracks state.
     /// </summary>
-    public class OpenCloseDoor : MonoBehaviour
+    public class OpenCloseObject : MonoBehaviour
     {
         // ─────────────────────────────────────────
         // Fields

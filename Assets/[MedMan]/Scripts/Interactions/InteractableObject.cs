@@ -3,6 +3,8 @@ using MedMan.Core;
 using MedMan.Interaction;
 using MedMan.Narrative;
 using NaughtyAttributes;
+using SojaExiles;
+using UnityEngine.Serialization;
 
 namespace MedMan.Interaction
 {
@@ -46,11 +48,13 @@ namespace MedMan.Interaction
         [ShowIf("_interactionType", InteractionType.Take)]
         [SerializeField] private int _amount = 1;
         
+        [FormerlySerializedAs("_doorController")]
         [BoxGroup("Interaction")]
-        [ShowIf("_interactionType", InteractionType.Use)]
+        [ShowIf("_interactionType", InteractionType.OpenClose)]
         [AllowNesting]
         [Tooltip("Door component to toggle when interacted with.")]
-        [SerializeField] private OpenCloseDoor _doorController;
+        [SerializeField] private OpenCloseObject objectController;
+
         
  
 
@@ -113,8 +117,8 @@ namespace MedMan.Interaction
             if (_hasSequence && _narrativeTextController != null)
                 _narrativeTextController.PlaySequence();
             
-            if (_interactionType == InteractionType.Use)
-                _doorController?.Toggle();
+            if (_interactionType == InteractionType.OpenClose)
+                objectController?.Toggle();
         }
 
         /// <inheritdoc/>

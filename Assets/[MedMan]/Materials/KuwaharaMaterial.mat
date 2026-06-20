@@ -101,8 +101,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Hardness: 1
-    - _Intensity: 0.02
-    - _KernelSize: 12
+    - _Intensity: 0.05
+    - _KernelSize: 2
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005

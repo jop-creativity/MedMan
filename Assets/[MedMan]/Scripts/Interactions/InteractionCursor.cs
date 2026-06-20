@@ -29,6 +29,9 @@ namespace MedMan.Interaction
         [SerializeField] private Sprite[] _useFrames      = new Sprite[5];
         
         [BoxGroup("Cursor Sprites")]
+        [SerializeField] private Sprite[] _openCloseFrames      = new Sprite[5];
+        
+        [BoxGroup("Cursor Sprites")]
         [SerializeField] private Sprite[] _takeFrames     = new Sprite[5];
 
         [BoxGroup("Animation")]
@@ -54,6 +57,7 @@ namespace MedMan.Interaction
             // Hide system cursor — UI cursor takes over
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible   = false;
+            _image = GetComponent<Image>();
         }
 
         private void OnEnable()
@@ -139,7 +143,7 @@ namespace MedMan.Interaction
             {
                 InteractionType.Examine => _examineFrames,
                 InteractionType.Rotate  => _rotateFrames,
-                InteractionType.Use     => _useFrames,
+                InteractionType.OpenClose     => _openCloseFrames,
                 InteractionType.Take    => _takeFrames,
                 _                       => null
             };
